@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 100">
+  <!-- Icon -->
+  <circle cx="50" cy="50" r="49" fill="#e0185e"/>
+  <line x1="50" y1="19.5" x2="50" y2="9" stroke="white" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="50" y1="19.5" x2="62.5" y2="10.5" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+  <line x1="50" y1="19.5" x2="37.5" y2="10.5" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+  <line x1="50" y1="19.5" x2="73.5" y2="14.5" stroke="white" stroke-width="2.1" stroke-linecap="round"/>
+  <line x1="50" y1="19.5" x2="26.5" y2="14.5" stroke="white" stroke-width="2.1" stroke-linecap="round"/>
+  <line x1="50" y1="19.5" x2="81.5" y2="22.5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="50" y1="19.5" x2="18.5" y2="22.5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M19,56 Q50,42.5 81,56 Q50,69.5 19,56Z" fill="white"/>
+  <circle cx="50" cy="56" r="11" fill="#e0185e"/>
+  <circle cx="50" cy="56" r="7.9" fill="none" stroke="white" stroke-width="1.7"/>
+  <path d="M50,58.3 C50,58.3 45.7,54 45.7,51.6 C45.7,49.7 47.35,49.3 50,51.95 C52.65,49.3 54.3,49.7 54.3,51.6 C54.3,54 50,58.3 50,58.3Z" fill="white"/>
+  <!-- Brand text -->
+  <text x="116" y="47" font-family="Georgia,'Times New Roman',serif" font-size="36" font-style="italic" fill="#e0185e" letter-spacing="0.5">Beleza Rara</text>
+  <line x1="116" y1="57" x2="430" y2="57" stroke="#e0185e" stroke-width="0.7" opacity="0.35"/>
+  <text x="116" y="75" font-family="Georgia,'Times New Roman',serif" font-size="15" font-style="italic" fill="#aaa" letter-spacing="2">Valquiria Almeida</text>
+</svg>
