@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beleza Rara – Fichas de Anamnese</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- SELECTOR SCREEN -->
+<div id="screen-select" class="screen active">
+  <div class="select-bg"></div>
+  <div class="select-card">
+    <div class="logo-block">
+      <svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" class="logo-svg">
+        <g transform="translate(60,38)">
+          <!-- rays -->
+          <line x1="0" y1="-32" x2="0" y2="-22" stroke="#e0185e" stroke-width="2" stroke-linecap="round"/>
+          <line x1="8" y1="-31" x2="5.5" y2="-21.5" stroke="#e0185e" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="-8" y1="-31" x2="-5.5" y2="-21.5" stroke="#e0185e" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="15" y1="-27" x2="10.5" y2="-19" stroke="#e0185e" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="-15" y1="-27" x2="-10.5" y2="-19" stroke="#e0185e" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="21" y1="-21" x2="15" y2="-15" stroke="#e0185e" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="-21" y1="-21" x2="-15" y2="-15" stroke="#e0185e" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- eye outline -->
+          <path d="M-28,0 Q0,-18 28,0 Q0,18 -28,0Z" fill="none" stroke="#e0185e" stroke-width="2.2"/>
+          <!-- pupil/iris -->
+          <circle cx="0" cy="0" r="10" fill="none" stroke="#e0185e" stroke-width="2"/>
+          <!-- heart inside eye -->
+          <path d="M0,3 C0,3 -6,-3 -6,-6 C-6,-9 -3,-10 0,-7 C3,-10 6,-9 6,-6 C6,-3 0,3 0,3Z" fill="#e0185e"/>
+        </g>
+      </svg>
+      <div class="logo-text">
+        <span class="logo-name">Beleza Rara</span>
+        <span class="logo-sub">Valquiria Almeida</span>
+      </div>
+    </div>
+    <h1 class="select-title">Fichas de Anamnese</h1>
+    <p class="select-desc">Selecione o procedimento para preencher a ficha da cliente</p>
+    <div class="procedure-cards">
+      <button class="proc-card" onclick="openForm('pestanas')">
+        <div class="proc-icon">👁️</div>
+        <div class="proc-label">Extensão de Pestanas</div>
+        <div class="proc-sub">Ficha + Consentimento + Imagem</div>
+      </button>
+      <button class="proc-card" onclick="openForm('depilacao')">
+        <div class="proc-icon">✨</div>
+        <div class="proc-label">Depilação</div>
+        <div class="proc-sub">Ficha de anamnese</div>
+      </button>
+      <button class="proc-card" onclick="openForm('laser')">
+        <div class="proc-icon">⚡</div>
+        <div class="proc-label">Depilação Laser de Diodo</div>
+        <div class="proc-sub">Ficha + registo de sessões</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- FORM SCREEN -->
+<div id="screen-form" class="screen">
+  <div class="form-topbar">
+    <button class="btn-back" onclick="goBack()">← Voltar</button>
+    <span id="form-title-bar">Ficha de Anamnese</span>
+    <button class="btn-print" onclick="printForms()">🖨️ Imprimir / Guardar PDF</button>
+  </div>
+
+  <div class="form-body">
+    <!-- ===== PESTANAS FORM ===== -->
+    <div id="form-pestanas" class="form-section" style="display:none">
+      <div class="form-card">
+        <h2 class="card-title">📋 Dados da Cliente</h2>
+        <div class="form-grid">
+          <div class="field-group full"><label>Nome completo</label><input type="text" id="p-nome" placeholder="Nome da cliente"></div>
+          <div class="field-group"><label>Data de Nascimento</label><input type="date" id="p-nasc"></div>
+          <div class="field-group"><label>Idade</label><input type="number" id="p-idade" placeholder="Idade"></div>
+          <div class="field-group"><label>Sexo</label>
+            <select id="p-sexo"><option value="">--</option><option>Feminino</option><option>Masculino</option><option>Outro</option></select>
+          </div>
+          <div class="field-group"><label>Telefone</label><input type="tel" id="p-tel" placeholder="+351 ..."></div>
+          <div class="field-group full"><label>Morada</label><input type="text" id="p-morada" placeholder="Rua, nº, Localidade"></div>
+          <div class="field-group"><label>E-mail</label><input type="email" id="p-email" placeholder="email@exemplo.com"></div>
+          <div class="field-group"><label>Doc. Identificação (NIF/BI/Passaporte)</label><input type="text" id="p-doc" placeholder="Nº documento"></div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h2 class="card-title">🔍 Avaliação</h2>
+        <div class="yn-list">
+          <div class="yn-row"><span>É gestante ou lactante?</span><div class="yn-btns"><label><input type="radio" name="p-gestante" value="SIM"> Sim</label><label><input type="radio" name="p-gestante" value="NÃO"> Não</label></div><input type="text" class="yn-obs" placeholder="Há quanto tempo?"></div>
+          <div class="yn-row"><span>Já fez procedimento nos olhos?</span><div class="yn-btns"><label><input type="radio" name="p-proced" value="SIM"> Sim</label><label><input type="radio" name="p-proced" value="NÃO"> Não</label></div><input type="text" class="yn-obs" placeholder="Observação"></div>
+          <div class="yn-row"><span>Possui alergia a esmalte ou cosméticos?</span><div class="yn-btns"><label><input type="radio" name="p-alergia" value="SIM"> Sim</label><label><input type="radio" name="p-alergia" value="NÃO"> Não</label></div><input type="text" class="yn-obs" placeholder="Qual?"></div>
+          <div class="yn-row"><span>Possui glaucoma ou problema ocular?</span><div class="yn-btns"><label><input type="radio" name="p-glaucoma" value="SIM"> Sim</label><label><input type="radio" name="p-glaucoma" value="NÃO"> Não</label></div><input type="text" class="yn-obs" placeholder="Qual?"></div>
+          <div class="yn-row"><span>Faz tratamento oncológico?</span><div class="yn-btns"><label><input type="radio" name="p-onco" value="SIM"> Sim</label><label><input type="radio" name="p-onco" value="NÃO"> Não</label></div><input type="text" class="yn-obs" placeholder="Observação"></div>
+          <div class="yn-row"><span>Está de rímel?</span><div class="yn-btns"><label><input type="radio" name="p-rimel" value="SIM"> Sim</label><label><input type="radio" name="p-rimel" value="NÃO"> Não</label></div><input type="text" class="yn-obs" placeholder="Observação"></div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h2 class="card-title">🛠️ Procedimento</h2>
+        <div class="form-grid">
+          <div class="field-group full"><label>Estilo</label><input type="text" id="p-estilo" placeholder="Ex: Natural, Cat Eye, Mega Volume..."></div>
+          <div class="field-group"><label>Curvatura</label><input type="text" id="p-curvatura" placeholder="Ex: B, C, D, L..."></div>
+          <div class="field-group"><label>Espessura</label><input type="text" id="p-espessura" placeholder="Ex: 0.07, 0.10, 0.12..."></div>
+          <div class="field-group full"><label>Modelo dos fios</label><input type="text" id="p-modelo" placeholder="Ex: Seda, Vison, Pvc..."></div>
+          <div class="field-group"><label>Data do Procedimento</label><input type="date" id="p-data"></div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h2 class="card-title">✅ Consentimento Informado</h2>
+        <div class="consent-preview">
+          <p>A cliente declara ter sido informada sobre a técnica, riscos e cuidados pós-procedimento de extensão de pestanas, conforme descrito no documento de consentimento.</p>
+          <div class="yn-list">
+            <div class="yn-row sm"><span>Sofre de alguma alergia conhecida (látex, esmalte, colas)?</span><div class="yn-btns"><label><input type="radio" name="c-alergia" value="Sim"> Sim</label><label><input type="radio" name="c-alergia" value="Não"> Não</label></div></div>
+            <div class="yn-row sm"><span>Tem antecedentes de problemas oculares (terçolhos, conjuntivites, blefarite)?</span><div class="yn-btns"><label><input type="radio" name="c-ocular" value="Sim"> Sim</label><label><input type="radio" name="c-ocular" value="Não"> Não</label></div></div>
+            <div class="yn-row sm"><span>Realizou alguma cirurgia ocular nos últimos 6 meses?</span><div class="yn-btns"><label><input type="radio" name="c-cirurgia" value="Sim"> Sim</label><label><input type="radio" name="c-cirurgia" value="Não"> Não</label></div></div>
+            <div class="yn-row sm"><span>Utiliza lentes de contacto?</span><div class="yn-btns"><label><input type="radio" name="c-lentes" value="Sim"> Sim</label><label><input type="radio" name="c-lentes" value="Não"> Não</label></div></div>
+            <div class="yn-row sm"><span>Está com alguma irritação ou sensibilidade ocular hoje?</span><div class="yn-btns"><label><input type="radio" name="c-irritacao" value="Sim"> Sim</label><label><input type="radio" name="c-irritacao" value="Não"> Não</label></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h2 class="card-title">📷 Autorização de Imagem</h2>
+        <div class="yn-row big"><span>Autoriza o uso da sua imagem para redes sociais e portefólio?</span>
+          <div class="yn-btns">
+            <label><input type="radio" name="p-imagem" value="Autorizo"> ✅ Autorizo</label>
+            <label><input type="radio" name="p-imagem" value="Não autorizo"> ❌ Não autorizo</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== DEPILAÇÃO FORM ===== -->
+    <div id="form-depilacao" class="form-section" style="display:none">
+      <div class="form-card">
+        <h2 class="card-title">📋 Dados da Cliente</h2>
+        <div class="form-grid">
+          <div class="field-group full"><label>Nome completo</label><input type="text" id="d-nome" placeholder="Nome da cliente"></div>
+          <div class="field-group"><label>Data de Nascimento</label><input type="date" id="d-nasc"></div>
+          <div class="field-group"><label>Telefone</label><input type="tel" id="d-tel" placeholder="+351 ..."></div>
+          <div class="field-group full"><label>Morada</label><input type="text" id="d-morada1" placeholder="Rua, nº"></div>
+          <div class="field-group full"><label>Morada (continuação)</label><input type="text" id="d-morada2" placeholder="Localidade, Código Postal"></div>
+          <div class="field-group"><label>NIF</label><input type="text" id="d-nif" placeholder="Número de Identificação Fiscal"></div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h2 class="card-title">📝 Histórico</h2>
+        <div class="history-list">
+          <div class="hist-item"><div class="hist-dot"></div><label>Já fez depilação antes? Se sim, qual método (cera, lâmina, laser, etc.)?</label><textarea id="d-h1" rows="2" placeholder="Resposta..."></textarea></div>
+          <div class="hist-item"><div class="hist-dot"></div><label>Tem alguma alergia a produtos de depilação ou sensibilidade na pele?</label><textarea id="d-h2" rows="2" placeholder="Resposta..."></textarea></div>
+          <div class="hist-item"><div class="hist-dot"></div><label>Qual é a área que deseja depilar hoje?</label><textarea id="d-h3" rows="2" placeholder="Resposta..."></textarea></div>
+          <div class="hist-item"><div class="hist-dot"></div><label>Está a tomar algum medicamento ou usando produtos tópicos que possam afetar a depilação?</label><textarea id="d-h4" rows="2" placeholder="Resposta..."></textarea></div>
+          <div class="hist-item"><div class="hist-dot"></div><label>Teve alguma reação adversa à depilação no passado (irritação, pelos encravados, queimaduras)?</label><textarea id="d-h5" rows="2" placeholder="Resposta..."></textarea></div>
+          <div class="hist-item"><div class="hist-dot"></div><label>Com que frequência faz depilação?</label><textarea id="d-h6" rows="2" placeholder="Resposta..."></textarea></div>
+          <div class="hist-item"><div class="hist-dot"></div><label>Qual é o seu objetivo com a depilação (remoção temporária, redução permanente)?</label><textarea id="d-h7" rows="2" placeholder="Resposta..."></textarea></div>
+          <div class="hist-item"><div class="hist-dot"></div><label>Está grávida ou a amamentar?</label><textarea id="d-h8" rows="2" placeholder="Resposta..."></textarea></div>
+        </div>
+        <div class="field-group full mt-2"><label>Alguma outra observação relevante</label><textarea id="d-obs" rows="3" placeholder="Observações adicionais..."></textarea></div>
+      </div>
+    </div>
+
+    <!-- ===== LASER FORM ===== -->
+    <div id="form-laser" class="form-section" style="display:none">
+      <div class="form-card">
+        <h2 class="card-title">📋 Dados da Cliente</h2>
+        <div class="form-grid">
+          <div class="field-group full"><label>Nome completo</label><input type="text" id="l-nome" placeholder="Nome da cliente"></div>
+          <div class="field-group"><label>Data de Nascimento</label><input type="date" id="l-nasc"></div>
+          <div class="field-group"><label>Idade</label><input type="number" id="l-idade" placeholder="Idade"></div>
+          <div class="field-group"><label>Sexo</label><select id="l-sexo"><option value="">--</option><option>Feminino</option><option>Masculino</option><option>Outro</option></select></div>
+          <div class="field-group"><label>Telefone</label><input type="tel" id="l-tel" placeholder="+351 ..."></div>
+          <div class="field-group full"><label>Morada</label><input type="text" id="l-morada" placeholder="Rua, nº, Localidade"></div>
+          <div class="field-group"><label>E-mail</label><input type="email" id="l-email" placeholder="email@exemplo.com"></div>
+          <div class="field-group"><label>Doc. Identificação (NIF/BI/Passaporte)</label><input type="text" id="l-doc" placeholder="Nº documento"></div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h2 class="card-title">🔍 Avaliação Clínica</h2>
+        <div class="yn-list">
+          <div class="yn-row"><span>Algum problema grave de saúde ou doença?</span><div class="yn-btns"><label><input type="radio" name="l-saude" value="SIM"> Sim</label><label><input type="radio" name="l-saude" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Sensibilidade da Pele?</span><div class="yn-btns"><label><input type="radio" name="l-pele" value="SIM"> Sim</label><label><input type="radio" name="l-pele" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Gravidez?</span><div class="yn-btns"><label><input type="radio" name="l-grav" value="SIM"> Sim</label><label><input type="radio" name="l-grav" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Amamentação?</span><div class="yn-btns"><label><input type="radio" name="l-ama" value="SIM"> Sim</label><label><input type="radio" name="l-ama" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Tem prótese metálica, bypass, desfibrilhador ou cardioversor?</span><div class="yn-btns"><label><input type="radio" name="l-prot" value="SIM"> Sim</label><label><input type="radio" name="l-prot" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Alterações de coagulação?</span><div class="yn-btns"><label><input type="radio" name="l-coag" value="SIM"> Sim</label><label><input type="radio" name="l-coag" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Doenças neuromusculares?</span><div class="yn-btns"><label><input type="radio" name="l-neuro" value="SIM"> Sim</label><label><input type="radio" name="l-neuro" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Antecedentes oncológicos?</span><div class="yn-btns"><label><input type="radio" name="l-onco" value="SIM"> Sim</label><label><input type="radio" name="l-onco" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Implantes recentes de colagénio na zona a tratar?</span><div class="yn-btns"><label><input type="radio" name="l-cola" value="SIM"> Sim</label><label><input type="radio" name="l-cola" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Está a fazer tratamento estético na zona a tratar?</span><div class="yn-btns"><label><input type="radio" name="l-trat" value="SIM"> Sim</label><label><input type="radio" name="l-trat" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Tem tatuagens na zona a tratar?</span><div class="yn-btns"><label><input type="radio" name="l-tatu" value="SIM"> Sim</label><label><input type="radio" name="l-tatu" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Tem dermatites (eczema, psoríase, fungos na pele)?</span><div class="yn-btns"><label><input type="radio" name="l-derm" value="SIM"> Sim</label><label><input type="radio" name="l-derm" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Tem alergias?</span><div class="yn-btns"><label><input type="radio" name="l-aler" value="SIM"> Sim</label><label><input type="radio" name="l-aler" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Tem problemas hormonais?</span><div class="yn-btns"><label><input type="radio" name="l-horm" value="SIM"> Sim</label><label><input type="radio" name="l-horm" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Está a decorrer a menopausa ou andropausa?</span><div class="yn-btns"><label><input type="radio" name="l-meno" value="SIM"> Sim</label><label><input type="radio" name="l-meno" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Tem doenças autoimunes?</span><div class="yn-btns"><label><input type="radio" name="l-auto" value="SIM"> Sim</label><label><input type="radio" name="l-auto" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Tem grande concentração de varizes ou derrames?</span><div class="yn-btns"><label><input type="radio" name="l-vari" value="SIM"> Sim</label><label><input type="radio" name="l-vari" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Tem acne activo?</span><div class="yn-btns"><label><input type="radio" name="l-acne" value="SIM"> Sim</label><label><input type="radio" name="l-acne" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Tem cicatrizes?</span><div class="yn-btns"><label><input type="radio" name="l-cica" value="SIM"> Sim</label><label><input type="radio" name="l-cica" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Tem epilepsia?</span><div class="yn-btns"><label><input type="radio" name="l-epil" value="SIM"> Sim</label><label><input type="radio" name="l-epil" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Tem diabetes?</span><div class="yn-btns"><label><input type="radio" name="l-diab" value="SIM"> Sim</label><label><input type="radio" name="l-diab" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Tem vitiligo?</span><div class="yn-btns"><label><input type="radio" name="l-viti" value="SIM"> Sim</label><label><input type="radio" name="l-viti" value="NÃO"> Não</label></div></div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h2 class="card-title">☀️ Avaliação Pré-Tratamento</h2>
+        <div class="yn-list">
+          <div class="yn-row"><span>Fez peeling mecânico nos últimos 15 dias?</span><div class="yn-btns"><label><input type="radio" name="l-peel" value="SIM"> Sim</label><label><input type="radio" name="l-peel" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Fez medicação oral ou tópica que torne a pele sensível?</span><div class="yn-btns"><label><input type="radio" name="l-med" value="SIM"> Sim</label><label><input type="radio" name="l-med" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Esteve exposto ao sol nas últimas 48h?</span><div class="yn-btns"><label><input type="radio" name="l-sol" value="SIM"> Sim</label><label><input type="radio" name="l-sol" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Utilizou creme depilatório nas últimas 72h?</span><div class="yn-btns"><label><input type="radio" name="l-crem" value="SIM"> Sim</label><label><input type="radio" name="l-crem" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Utilizou autobronzeador nos últimos 5 dias?</span><div class="yn-btns"><label><input type="radio" name="l-auto2" value="SIM"> Sim</label><label><input type="radio" name="l-auto2" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Fez recentemente solário?</span><div class="yn-btns"><label><input type="radio" name="l-sola" value="SIM"> Sim</label><label><input type="radio" name="l-sola" value="NÃO"> Não</label></div></div>
+          <div class="yn-row"><span>Alguma vez fez tratamentos de depilação a laser?</span><div class="yn-btns"><label><input type="radio" name="l-prev" value="SIM"> Sim</label><label><input type="radio" name="l-prev" value="NÃO"> Não</label></div></div>
+        </div>
+        <div class="form-grid mt-2">
+          <div class="field-group full"><label>Se SIM, em quais zonas?</label><input type="text" id="l-zonas-prev" placeholder="Zonas tratadas anteriormente"></div>
+          <div class="field-group full"><label>Última vez que fez?</label><input type="text" id="l-ultima" placeholder="Data aproximada"></div>
+          <div class="field-group full"><label>Fototipo de pele</label>
+            <div class="fototipo-selector">
+              <label class="ft-btn"><input type="radio" name="l-foto" value="I"> I</label>
+              <label class="ft-btn"><input type="radio" name="l-foto" value="II"> II</label>
+              <label class="ft-btn"><input type="radio" name="l-foto" value="III"> III</label>
+              <label class="ft-btn"><input type="radio" name="l-foto" value="IV"> IV</label>
+              <label class="ft-btn"><input type="radio" name="l-foto" value="V"> V</label>
+              <label class="ft-btn"><input type="radio" name="l-foto" value="VI"> VI</label>
+            </div>
+          </div>
+          <div class="field-group full"><label>Observações</label><textarea id="l-obs" rows="3" placeholder="Observações adicionais..."></textarea></div>
+          <div class="field-group"><label>Data de início do tratamento</label><input type="date" id="l-data-inicio"></div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h2 class="card-title">📊 Registo de Sessões</h2>
+        <div class="sessions-table-wrap">
+          <table class="sessions-table">
+            <thead>
+              <tr>
+                <th>Sessão</th><th>Data</th><th>Zona</th><th>FotoTipo</th>
+                <th>Pulso</th><th>Frequência</th><th>Energia</th><th>Duração</th>
+                <th>Passagens</th><th>Resultados</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="sessions-tbody">
+              <tr>
+                <td><input type="text" placeholder="1" style="width:35px"></td>
+                <td><input type="date" style="width:130px"></td>
+                <td><input type="text" placeholder="Zona" style="width:80px"></td>
+                <td><input type="text" placeholder="III" style="width:50px"></td>
+                <td><input type="text" placeholder="ms" style="width:55px"></td>
+                <td><input type="text" placeholder="Hz" style="width:55px"></td>
+                <td><input type="text" placeholder="J/cm²" style="width:60px"></td>
+                <td><input type="text" placeholder="min" style="width:55px"></td>
+                <td><input type="text" placeholder="nº" style="width:45px"></td>
+                <td><input type="text" placeholder="Resultado" style="width:100px"></td>
+                <td><button class="btn-rm-row" onclick="removeRow(this)">✕</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <button class="btn-add-row" onclick="addSessionRow()">+ Adicionar sessão</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn-clear" onclick="clearForm()">🗑️ Limpar</button>
+    <button class="btn-print-main" onclick="printForms()">🖨️ Imprimir / Gerar PDF</button>
+  </div>
+</div>
+
+<!-- PRINT AREA (hidden, replaced on print) -->
+<div id="print-area" style="display:none"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
