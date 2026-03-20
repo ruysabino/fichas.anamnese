@@ -362,7 +362,7 @@ function populateForm(d) {
     if (ynRows[2]) { const o = ynRows[2].querySelector('.yn-obs'); if (o) o.value = d.alerObs || ''; }
   }
 
-  if  if (d.proc === 'depilacao') {
+  if (d.proc === 'depilacao') {
     setVal('d-nome', d.nome); setVal('d-nasc', d.nasc);
     document.getElementById('d-idade').value = d.nasc ? calcIdade(d.nasc) : (d.idade || '');
     setVal('d-sexo', d.sexo); setVal('d-tel', d.tel);
