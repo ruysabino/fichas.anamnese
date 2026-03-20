@@ -206,6 +206,35 @@ function val(id) {
   return el ? el.value.trim() : '';
 }
 
+/* ── Cálculo de idade a partir da data de nascimento ── */
+function calcIdade(nascStr) {
+  if (!nascStr) return '';
+  const nasc  = new Date(nascStr);
+  const hoje  = new Date();
+  if (isNaN(nasc)) return '';
+
+  let anos = hoje.getFullYear() - nasc.getFullYear();
+  // anniversary this year
+  const anivers = new Date(hoje.getFullYear(), nasc.getMonth(), nasc.getDate());
+  if (hoje < anivers) anos--;
+
+  // days since last birthday
+  const ultimoAnivers = new Date(hoje.getFullYear() - (hoje < anivers ? 1 : 0),
+                                  nasc.getMonth(), nasc.getDate());
+  const diffMs   = hoje - ultimoAnivers;
+  const dias     = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  return `${anos} anos e ${dias} dias`;
+}
+
+function onNascChange(nascInputId, idadeInputId) {
+  const nascEl  = document.getElementById(nascInputId);
+  const idadeEl = document.getElementById(idadeInputId);
+  if (!nascEl || !idadeEl) return;
+  const result = calcIdade(nascEl.value);
+  idadeEl.value = result;
+}
+
 function collectForm() {
   const now = new Date().toISOString().slice(0, 10);
 
@@ -330,7 +359,9 @@ function setRadio(name, value) {
 function populateForm(d) {
   if (d.proc === 'pestanas') {
     const set = (id, v) => { const el = document.getElementById(id); if (el && v !== undefined) el.value = v; };
-    set('p-nome', d.nome); set('p-nasc', d.nasc); set('p-idade', d.idade);
+    set('p-nome', d.nome); set('p-nasc', d.nasc);
+    // recalculate age from DOB; fall back to stored value if no DOB
+    document.getElementById('p-idade').value = d.nasc ? calcIdade(d.nasc) : (d.idade || '');
     set('p-sexo', d.sexo); set('p-tel', d.tel);   set('p-morada', d.morada);
     set('p-email', d.email); set('p-doc', d.doc);
     set('p-estilo', d.estilo); set('p-curvatura', d.curv);
@@ -361,7 +392,9 @@ function populateForm(d) {
 
   if (d.proc === 'laser') {
     const set = (id, v) => { const el = document.getElementById(id); if (el && v !== undefined) el.value = v; };
-    set('l-nome', d.nome); set('l-nasc', d.nasc); set('l-idade', d.idade);
+    set('l-nome', d.nome); set('l-nasc', d.nasc);
+    // recalculate age from DOB
+    document.getElementById('l-idade').value = d.nasc ? calcIdade(d.nasc) : (d.idade || '');
     set('l-sexo', d.sexo); set('l-tel', d.tel);   set('l-morada', d.morada);
     set('l-email', d.email); set('l-doc', d.doc);
     set('l-zonas-prev', d.zonasPrev); set('l-ultima', d.ultima);
@@ -512,13 +545,26 @@ function makeFields(rows) {
 }
 
 function makeYnTable(pairs) {
+  // normalise to uppercase+no-accent so 'Sim','SIM','sim','Não','NAO' all work
+  function normYn(v) {
+    return (v || '').toUpperCase()
+      .replace(/Ã/g,'A').replace(/Â/g,'A').replace(/À/g,'A').replace(/Á/g,'A')
+      .replace(/É/g,'E').replace(/Ê/g,'E').replace(/Í/g,'I')
+      .replace(/Ó/g,'O').replace(/Ô/g,'O').replace(/Ú/g,'U').replace(/Ç/g,'C')
+      .trim();
+  }
   return `<table class="pd-yn-table">${
-    pairs.map(([label, val]) =>
-      `<tr>
+    pairs.map(([label, rawVal]) => {
+      const v = normYn(rawVal);
+      const simOk = v === 'SIM';
+      const naoOk = v === 'NAO';
+      return `<tr>
         <td class="pd-yn-q">${label}</td>
-        <td class="pd-yn-a">${ynBox(val,'SIM')}&nbsp;&nbsp;${ynBox(val,'NÃO')}</td>
-      </tr>`
-    ).join('')
+        <td class="pd-yn-a">
+          <span class="print-box${simOk ? ' checked' : ''}"></span><span class="print-box-label">SIM</span>&nbsp;&nbsp;<span class="print-box${naoOk ? ' checked' : ''}"></span><span class="print-box-label">NÃO</span>
+        </td>
+      </tr>`;
+    }).join('')
   }</table>`;
 }
 
