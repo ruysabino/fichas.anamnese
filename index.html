@@ -211,95 +211,115 @@
 
       <div class="form-card">
         <h2 class="card-title">📝 Histórico</h2>
-        <div class="hist-block">
+        <div class="yn-list">
 
-          <!-- 1 -->
-          <div class="hist-q">
-            <div class="hist-q-label"><span class="hist-num">1</span> Já fez depilação antes?</div>
-            <div class="hist-yn">
-              <label class="yn-lbl"><input type="radio" name="d-fez" value="SIM"> SIM</label>
-              <label class="yn-lbl"><input type="radio" name="d-fez" value="NÃO"> NÃO</label>
+          <!-- 1 — SIM/NÃO + método checkboxes -->
+          <div class="yn-row yn-row-col">
+            <div class="yn-row-top">
+              <span>1) Já fez depilação antes?</span>
+              <div class="yn-btns">
+                <label class="yn-lbl"><input type="radio" name="d-fez" value="SIM"> SIM</label>
+                <label class="yn-lbl"><input type="radio" name="d-fez" value="NÃO"> NÃO</label>
+              </div>
             </div>
-            <div class="hist-sub">
-              <div class="hist-sub-label">Se sim, qual foi o método?</div>
-              <div class="hist-checks">
-                <label class="yn-lbl"><input type="checkbox" name="d-metodo" value="Cera"> Cera</label>
-                <label class="yn-lbl"><input type="checkbox" name="d-metodo" value="Lâmina"> Lâmina</label>
-                <label class="yn-lbl"><input type="checkbox" name="d-metodo" value="Laser"> Laser</label>
-                <label class="yn-lbl chk-outro"><input type="checkbox" name="d-metodo" value="Outro"> Outro</label>
-                <input type="text" class="hist-outro-input" id="d-metodo-outro" placeholder="Especifique...">
+            <div class="yn-sub">
+              <span class="yn-sub-label">Se sim, qual foi o método?</span>
+              <div class="yn-sub-checks">
+                <label class="yn-lbl"><input type="checkbox" name="d-metodo" value="Cera"> 🕯️ Cera</label>
+                <label class="yn-lbl"><input type="checkbox" name="d-metodo" value="Lâmina"> 🪒 Lâmina</label>
+                <label class="yn-lbl"><input type="checkbox" name="d-metodo" value="Laser"> ⚡ Laser</label>
+                <label class="yn-lbl"><input type="checkbox" name="d-metodo" value="Outro"> Outro</label>
+                <input type="text" class="yn-obs" id="d-metodo-outro" placeholder="Especifique...">
               </div>
             </div>
           </div>
 
-          <!-- 2 -->
-          <div class="hist-q">
-            <div class="hist-q-label"><span class="hist-num">2</span> Tem alguma alergia a produtos de depilação ou sensibilidade na pele?</div>
-            <div class="hist-yn">
-              <label class="yn-lbl"><input type="radio" name="d-alergia" value="SIM"> SIM</label>
-              <label class="yn-lbl"><input type="radio" name="d-alergia" value="NÃO"> NÃO</label>
+          <!-- 2 — SIM/NÃO + texto -->
+          <div class="yn-row yn-row-col">
+            <div class="yn-row-top">
+              <span>2) Tem alguma alergia a produtos de depilação ou sensibilidade na pele?</span>
+              <div class="yn-btns">
+                <label class="yn-lbl"><input type="radio" name="d-alergia" value="SIM"> SIM</label>
+                <label class="yn-lbl"><input type="radio" name="d-alergia" value="NÃO"> NÃO</label>
+              </div>
             </div>
-            <div class="hist-sub">
-              <label class="hist-sub-label">Se sim, especifique:</label>
-              <input type="text" class="hist-text-input" id="d-alergia-esp" placeholder="Descrição da alergia...">
+            <div class="yn-sub">
+              <span class="yn-sub-label">Se sim, especifique:</span>
+              <input type="text" class="yn-obs yn-obs-wide" id="d-alergia-esp" placeholder="Descrição da alergia...">
             </div>
           </div>
 
-          <!-- 3 -->
-          <div class="hist-q">
-            <div class="hist-q-label"><span class="hist-num">3</span> Qual é a área que deseja depilar hoje?</div>
-            <input type="text" class="hist-text-input" id="d-area" placeholder="Ex: pernas, axilas, virilha...">
+          <!-- 3 — texto livre -->
+          <div class="yn-row yn-row-col">
+            <div class="yn-row-top">
+              <span>3) Qual é a área que deseja depilar hoje?</span>
+            </div>
+            <div class="yn-sub">
+              <input type="text" class="yn-obs yn-obs-wide" id="d-area" placeholder="Ex: pernas, axilas, virilha, buço...">
+            </div>
           </div>
 
-          <!-- 4 -->
-          <div class="hist-q">
-            <div class="hist-q-label"><span class="hist-num">4</span> Está a tomar algum medicamento ou usando produtos tópicos que possam afetar a depilação?</div>
-            <div class="hist-yn">
+          <!-- 4 — SIM/NÃO -->
+          <div class="yn-row">
+            <span>4) Está a tomar algum medicamento ou usando produtos tópicos que possam afetar a depilação?</span>
+            <div class="yn-btns">
               <label class="yn-lbl"><input type="radio" name="d-medic" value="SIM"> SIM</label>
               <label class="yn-lbl"><input type="radio" name="d-medic" value="NÃO"> NÃO</label>
             </div>
           </div>
 
-          <!-- 5 -->
-          <div class="hist-q">
-            <div class="hist-q-label"><span class="hist-num">5</span> Teve alguma reação adversa à depilação no passado?</div>
-            <div class="hist-checks">
-              <label class="yn-lbl"><input type="checkbox" name="d-reacao" value="Irritação"> Irritação</label>
-              <label class="yn-lbl"><input type="checkbox" name="d-reacao" value="Pelos encravados"> Pelos encravados</label>
-              <label class="yn-lbl"><input type="checkbox" name="d-reacao" value="Queimaduras"> Queimaduras</label>
-              <label class="yn-lbl chk-outro"><input type="checkbox" name="d-reacao" value="Outro"> Outro</label>
-              <input type="text" class="hist-outro-input" id="d-reacao-outro" placeholder="Especifique...">
+          <!-- 5 — checkboxes de reação -->
+          <div class="yn-row yn-row-col">
+            <div class="yn-row-top">
+              <span>5) Teve alguma reação adversa à depilação no passado?</span>
+            </div>
+            <div class="yn-sub">
+              <div class="yn-sub-checks">
+                <label class="yn-lbl"><input type="checkbox" name="d-reacao" value="Irritação"> 🔴 Irritação</label>
+                <label class="yn-lbl"><input type="checkbox" name="d-reacao" value="Pelos encravados"> 🌀 Pelos encravados</label>
+                <label class="yn-lbl"><input type="checkbox" name="d-reacao" value="Queimaduras"> 🔥 Queimaduras</label>
+                <label class="yn-lbl"><input type="checkbox" name="d-reacao" value="Outro"> Outro</label>
+                <input type="text" class="yn-obs" id="d-reacao-outro" placeholder="Especifique...">
+              </div>
             </div>
           </div>
 
-          <!-- 6 -->
-          <div class="hist-q">
-            <div class="hist-q-label"><span class="hist-num">6</span> Com que frequência faz depilação?</div>
-            <input type="text" class="hist-text-input" id="d-freq" placeholder="Ex: mensal, quinzenal...">
-          </div>
-
-          <!-- 7 -->
-          <div class="hist-q">
-            <div class="hist-q-label"><span class="hist-num">7</span> Qual é o seu objetivo com a depilação?</div>
-            <div class="hist-checks">
-              <label class="yn-lbl"><input type="checkbox" name="d-obj" value="Remoção temporária"> Remoção temporária</label>
-              <label class="yn-lbl"><input type="checkbox" name="d-obj" value="Redução permanente"> Redução permanente</label>
-              <label class="yn-lbl"><input type="checkbox" name="d-obj" value="Manutenção"> Manutenção</label>
-              <label class="yn-lbl chk-outro"><input type="checkbox" name="d-obj" value="Outro"> Outro</label>
-              <input type="text" class="hist-outro-input" id="d-obj-outro" placeholder="Especifique...">
+          <!-- 6 — texto livre -->
+          <div class="yn-row yn-row-col">
+            <div class="yn-row-top">
+              <span>6) Com que frequência faz depilação?</span>
+            </div>
+            <div class="yn-sub">
+              <input type="text" class="yn-obs yn-obs-wide" id="d-freq" placeholder="Ex: mensal, quinzenal, semanal...">
             </div>
           </div>
 
-          <!-- 8 -->
-          <div class="hist-q">
-            <div class="hist-q-label"><span class="hist-num">8</span> Está grávida ou a amamentar?</div>
-            <div class="hist-yn">
+          <!-- 7 — checkboxes objetivo -->
+          <div class="yn-row yn-row-col">
+            <div class="yn-row-top">
+              <span>7) Qual é o seu objetivo com a depilação?</span>
+            </div>
+            <div class="yn-sub">
+              <div class="yn-sub-checks">
+                <label class="yn-lbl"><input type="checkbox" name="d-obj" value="Remoção temporária"> ✂️ Remoção temporária</label>
+                <label class="yn-lbl"><input type="checkbox" name="d-obj" value="Redução permanente"> 🎯 Redução permanente</label>
+                <label class="yn-lbl"><input type="checkbox" name="d-obj" value="Manutenção"> 🔄 Manutenção</label>
+                <label class="yn-lbl"><input type="checkbox" name="d-obj" value="Outro"> Outro</label>
+                <input type="text" class="yn-obs" id="d-obj-outro" placeholder="Especifique...">
+              </div>
+            </div>
+          </div>
+
+          <!-- 8 — SIM/NÃO -->
+          <div class="yn-row">
+            <span>8) Está grávida ou a amamentar?</span>
+            <div class="yn-btns">
               <label class="yn-lbl"><input type="radio" name="d-gravida" value="SIM"> SIM</label>
               <label class="yn-lbl"><input type="radio" name="d-gravida" value="NÃO"> NÃO</label>
             </div>
           </div>
 
-        </div><!-- /hist-block -->
+        </div><!-- /yn-list -->
       </div>
 
       <div class="form-card">

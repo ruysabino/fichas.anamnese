@@ -1095,3 +1095,58 @@ body {
   background: white;
 }
 .hist-outro-input:focus { border-color: var(--pink); }
+
+/* ── yn-row extensions para perguntas com sub-opções ────────── */
+
+/* Coluna: pergunta + botões em cima, sub-conteúdo abaixo */
+.yn-row.yn-row-col {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.yn-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.yn-row-top span {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Sub-area: fundo ligeiramente mais claro, com borda suave */
+.yn-sub {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.yn-sub-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--pink);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.yn-sub-checks {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Input de texto largo (ocupa restante do espaço) */
+.yn-obs-wide {
+  width: 100%;
+  flex-shrink: 0;
+}
