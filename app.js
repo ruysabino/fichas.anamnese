@@ -243,10 +243,28 @@ function collectForm() {
       sexo: val('d-sexo'), tel: val('d-tel'), morada: val('d-morada'),
       email: val('d-email'), doc: val('d-doc'),
       nac: val('d-nac'),
-      h1: val('d-h1'), h2: val('d-h2'), h3: val('d-h3'), h4: val('d-h4'),
-      h5: val('d-h5'), h6: val('d-h6'), h7: val('d-h7'), h8: val('d-h8'),
-      obs: val('d-obs'),
-      imgAuth: getRadio('d-imagem'),
+      // Q1
+      fez:         getRadio('d-fez'),
+      metodo:      getCheckboxes('d-metodo'),
+      metodoOutro: val('d-metodo-outro'),
+      // Q2
+      alergia:     getRadio('d-alergia'),
+      alergiaEsp:  val('d-alergia-esp'),
+      // Q3
+      area:        val('d-area'),
+      // Q4
+      medic:       getRadio('d-medic'),
+      // Q5
+      reacao:      getCheckboxes('d-reacao'),
+      reacaoOutro: val('d-reacao-outro'),
+      // Q6
+      freq:        val('d-freq'),
+      // Q7
+      obj:         getCheckboxes('d-obj'),
+      objOutro:    val('d-obj-outro'),
+      // Q8
+      gravida:     getRadio('d-gravida'),
+      imgAuth:     getRadio('d-imagem'),
     };
   }
 
@@ -344,13 +362,32 @@ function populateForm(d) {
     if (ynRows[2]) { const o = ynRows[2].querySelector('.yn-obs'); if (o) o.value = d.alerObs || ''; }
   }
 
-  if (d.proc === 'depilacao') {
+  if  if (d.proc === 'depilacao') {
     setVal('d-nome', d.nome); setVal('d-nasc', d.nasc);
     document.getElementById('d-idade').value = d.nasc ? calcIdade(d.nasc) : (d.idade || '');
     setVal('d-sexo', d.sexo); setVal('d-tel', d.tel);
     setVal('d-morada', d.morada); setVal('d-email', d.email); setVal('d-doc', d.doc);
     setNac('d', d.nac);
-    ['h1','h2','h3','h4','h5','h6','h7','h8','obs'].forEach(k => setVal('d-'+k, d[k]));
+    // Q1
+    setRadio('d-fez', d.fez);
+    (d.metodo || []).forEach(v => { const el = document.querySelector(`input[name="d-metodo"][value="${v}"]`); if(el) el.checked=true; });
+    setVal('d-metodo-outro', d.metodoOutro);
+    // Q2
+    setRadio('d-alergia', d.alergia); setVal('d-alergia-esp', d.alergiaEsp);
+    // Q3
+    setVal('d-area', d.area);
+    // Q4
+    setRadio('d-medic', d.medic);
+    // Q5
+    (d.reacao || []).forEach(v => { const el = document.querySelector(`input[name="d-reacao"][value="${v}"]`); if(el) el.checked=true; });
+    setVal('d-reacao-outro', d.reacaoOutro);
+    // Q6
+    setVal('d-freq', d.freq);
+    // Q7
+    (d.obj || []).forEach(v => { const el = document.querySelector(`input[name="d-obj"][value="${v}"]`); if(el) el.checked=true; });
+    setVal('d-obj-outro', d.objOutro);
+    // Q8
+    setRadio('d-gravida', d.gravida);
     setRadio('d-imagem', d.imgAuth);
   }
 
@@ -633,37 +670,72 @@ function buildPestanasHTML(d) {
 
 /* ── DEPILAÇÃO ── */
 function buildDepilacaoHTML(d) {
-  const questions = [
-    ['Já fez depilação antes? Se sim, qual método (cera, lâmina, laser, etc.)?', d.h1],
-    ['Tem alguma alergia a produtos de depilação ou sensibilidade na pele?', d.h2],
-    ['Qual é a área que deseja depilar hoje?', d.h3],
-    ['Está a tomar algum medicamento ou usando produtos tópicos que possam afetar a depilação?', d.h4],
-    ['Teve alguma reação adversa à depilação no passado (irritação, pelos encravados, queimaduras)?', d.h5],
-    ['Com que frequência faz depilação?', d.h6],
-    ['Qual é o seu objetivo com a depilação (remoção temporária, redução permanente)?', d.h7],
-    ['Está grávida ou a amamentar?', d.h8],
-  ];
+  // helper: render checkbox list + optional outro
+  function chkList(arr, outro) {
+    const items = (arr || []).join(', ');
+    if (!items && !outro) return '—';
+    return [items, outro ? '+ ' + outro : ''].filter(Boolean).join('; ');
+  }
 
-  const histRows = questions.map(([q,a]) => `
-    <tr><td style="padding:5px 4px;border-bottom:1px solid #eee;vertical-align:top;">
-      <div style="display:flex;gap:8px;align-items:flex-start;">
-        <span style="color:#E46589;font-size:14pt;line-height:0.9;flex-shrink:0;">●</span>
-        <div style="flex:1;">
-          <div style="font-weight:600;font-size:9pt;">${q}</div>
-          <div style="border-bottom:1px solid #bbb;min-height:14px;margin-top:3px;font-size:9pt;">${a||''}</div>
-        </div>
-      </div>
-    </td></tr>`).join('');
+  // helper: yn row for print
+  function pYn(label, val) {
+    const sim = normYn(val) === 'SIM';
+    const nao = normYn(val) === 'NAO';
+    return `<tr>
+      <td class="pd-yn-q">${label}</td>
+      <td class="pd-yn-a">
+        <span class="print-box${sim?' checked':''}"></span><span class="print-box-label">SIM</span>
+        &nbsp;&nbsp;
+        <span class="print-box${nao?' checked':''}"></span><span class="print-box-label">NÃO</span>
+      </td>
+    </tr>`;
+  }
+
+  // helper: checkbox row for print
+  function pChk(label, options, selected, outro) {
+    const boxes = options.map(o => {
+      const chk = (selected || []).includes(o);
+      return `<span class="print-box${chk?' checked':''}"></span><span class="print-box-label">${o}</span>`;
+    }).join('&nbsp;&nbsp;');
+    const outroPart = outro
+      ? `&nbsp;&nbsp;<span class="print-box${(selected||[]).includes('Outro')?' checked':''}"></span><span class="print-box-label">Outro: ${outro}</span>`
+      : '';
+    return `<tr>
+      <td class="pd-yn-q" colspan="2" style="padding-bottom:5px;">
+        <div style="font-weight:600;margin-bottom:3px;">${label}</div>
+        <div style="font-size:8.5pt;">${boxes}${outroPart}</div>
+      </td>
+    </tr>`;
+  }
+
+  // helper: open text row
+  function pText(label, value) {
+    return `<tr>
+      <td class="pd-yn-q">${label}</td>
+      <td style="border-bottom:1px solid #ccc;font-weight:bold;font-size:9pt;padding:4px 6px;">${value||''}</td>
+    </tr>`;
+  }
 
   return `<div class="pd-page">
     ${printHeader('FICHA DE ANAMNESE – DEPILAÇÃO')}
     ${dadosClienteBlock(d)}
     <div class="pd-section-title">HISTÓRICO</div>
-    <table style="width:100%;border-collapse:collapse;">${histRows}</table>
-    <div style="margin-top:5mm;font-size:8pt;font-weight:700;color:#E46589;text-transform:uppercase;">Alguma outra observação relevante:</div>
-    <div style="border:1.5px solid #E46589;border-radius:4px;min-height:20mm;padding:5px 8px;margin-top:3px;font-size:9pt;">${d.obs||''}</div>
+    <table class="pd-yn-table">
+      ${pYn('1) Já fez depilação antes?', d.fez)}
+      ${pChk('Se sim, qual foi o método?', ['Cera','Lâmina','Laser'], d.metodo, d.metodoOutro)}
+      ${pYn('2) Tem alguma alergia a produtos de depilação ou sensibilidade na pele?', d.alergia)}
+      <tr><td colspan="2" style="padding:2px 4px 5px;font-size:8.5pt;">
+        Se sim, especifique: <span style="border-bottom:1px solid #bbb;display:inline-block;min-width:140px;font-weight:bold;">${d.alergiaEsp||''}</span>
+      </td></tr>
+      ${pText('3) Qual é a área que deseja depilar hoje?', d.area)}
+      ${pYn('4) Está a tomar algum medicamento ou usando produtos tópicos que possam afetar a depilação?', d.medic)}
+      ${pChk('5) Teve alguma reação adversa à depilação no passado?', ['Irritação','Pelos encravados','Queimaduras'], d.reacao, d.reacaoOutro)}
+      ${pText('6) Com que frequência faz depilação?', d.freq)}
+      ${pChk('7) Qual é o seu objetivo com a depilação?', ['Remoção temporária','Redução permanente','Manutenção'], d.obj, d.objOutro)}
+      ${pYn('8) Está grávida ou a amamentar?', d.gravida)}
+    </table>
     ${imagemBlock(d.imgAuth)}
-    ${sigRow([['Assinatura da Cliente',''],['Data','&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;']])}
+    ${sigRow([['Assinatura da Cliente',''],['Data','&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;']])}
   </div>`;
 }
 

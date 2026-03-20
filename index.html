@@ -121,6 +121,20 @@
           <div class="field-group full"><label>Morada</label><input type="text" id="p-morada" placeholder="Rua, nº, Localidade"></div>
           <div class="field-group"><label>E-mail</label><input type="email" id="p-email" placeholder="email@exemplo.com"></div>
           <div class="field-group"><label>Doc. Identificação (NIF/BI/Passaporte)</label><input type="text" id="p-doc" placeholder="Nº documento"></div>
+          <div class="field-group full"><label>Nacionalidade</label>
+            <div class="nac-wrapper" id="nac-p">
+              <div class="nac-display" onclick="toggleNac('p')">
+                <span class="nac-flag" id="nac-flag-p"></span>
+                <span class="nac-label" id="nac-lbl-p">Selecionar país…</span>
+                <span class="nac-arrow">▾</span>
+              </div>
+              <div class="nac-dropdown" id="nac-drop-p" style="display:none;">
+                <input type="text" class="nac-search" placeholder="🔍 Pesquisar país…" oninput="filterNac('p',this.value)" autocomplete="off">
+                <div class="nac-list" id="nac-list-p"></div>
+              </div>
+              <input type="hidden" id="p-nac" name="p-nac">
+            </div>
+          </div>
         </div>
       </div>
 
@@ -178,22 +192,114 @@
           <div class="field-group full"><label>Morada</label><input type="text" id="d-morada" placeholder="Rua, nº, Localidade"></div>
           <div class="field-group"><label>E-mail</label><input type="email" id="d-email" placeholder="email@exemplo.com"></div>
           <div class="field-group"><label>Doc. Identificação (NIF/BI/Passaporte)</label><input type="text" id="d-doc" placeholder="Nº documento"></div>
+          <div class="field-group full"><label>Nacionalidade</label>
+            <div class="nac-wrapper" id="nac-d">
+              <div class="nac-display" onclick="toggleNac('d')">
+                <span class="nac-flag" id="nac-flag-d"></span>
+                <span class="nac-label" id="nac-lbl-d">Selecionar país…</span>
+                <span class="nac-arrow">▾</span>
+              </div>
+              <div class="nac-dropdown" id="nac-drop-d" style="display:none;">
+                <input type="text" class="nac-search" placeholder="🔍 Pesquisar país…" oninput="filterNac('d',this.value)" autocomplete="off">
+                <div class="nac-list" id="nac-list-d"></div>
+              </div>
+              <input type="hidden" id="d-nac" name="d-nac">
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="form-card">
         <h2 class="card-title">📝 Histórico</h2>
-        <div class="history-list">
-          <div class="hist-item"><div class="hist-dot"></div><div><label>Já fez depilação antes? Se sim, qual método (cera, lâmina, laser, etc.)?</label><textarea id="d-h1" rows="2" placeholder="Resposta..."></textarea></div></div>
-          <div class="hist-item"><div class="hist-dot"></div><div><label>Tem alguma alergia a produtos de depilação ou sensibilidade na pele?</label><textarea id="d-h2" rows="2" placeholder="Resposta..."></textarea></div></div>
-          <div class="hist-item"><div class="hist-dot"></div><div><label>Qual é a área que deseja depilar hoje?</label><textarea id="d-h3" rows="2" placeholder="Resposta..."></textarea></div></div>
-          <div class="hist-item"><div class="hist-dot"></div><div><label>Está a tomar algum medicamento ou usando produtos tópicos que possam afetar a depilação?</label><textarea id="d-h4" rows="2" placeholder="Resposta..."></textarea></div></div>
-          <div class="hist-item"><div class="hist-dot"></div><div><label>Teve alguma reação adversa à depilação no passado (irritação, pelos encravados, queimaduras)?</label><textarea id="d-h5" rows="2" placeholder="Resposta..."></textarea></div></div>
-          <div class="hist-item"><div class="hist-dot"></div><div><label>Com que frequência faz depilação?</label><textarea id="d-h6" rows="2" placeholder="Resposta..."></textarea></div></div>
-          <div class="hist-item"><div class="hist-dot"></div><div><label>Qual é o seu objetivo com a depilação (remoção temporária, redução permanente)?</label><textarea id="d-h7" rows="2" placeholder="Resposta..."></textarea></div></div>
-          <div class="hist-item"><div class="hist-dot"></div><div><label>Está grávida ou a amamentar?</label><textarea id="d-h8" rows="2" placeholder="Resposta..."></textarea></div></div>
-        </div>
-        <div class="field-group full" style="margin-top:16px;"><label>Alguma outra observação relevante</label><textarea id="d-obs" rows="3" placeholder="Observações adicionais..."></textarea></div>
+        <div class="hist-block">
+
+          <!-- 1 -->
+          <div class="hist-q">
+            <div class="hist-q-label"><span class="hist-num">1</span> Já fez depilação antes?</div>
+            <div class="hist-yn">
+              <label class="yn-lbl"><input type="radio" name="d-fez" value="SIM"> SIM</label>
+              <label class="yn-lbl"><input type="radio" name="d-fez" value="NÃO"> NÃO</label>
+            </div>
+            <div class="hist-sub">
+              <div class="hist-sub-label">Se sim, qual foi o método?</div>
+              <div class="hist-checks">
+                <label class="yn-lbl"><input type="checkbox" name="d-metodo" value="Cera"> Cera</label>
+                <label class="yn-lbl"><input type="checkbox" name="d-metodo" value="Lâmina"> Lâmina</label>
+                <label class="yn-lbl"><input type="checkbox" name="d-metodo" value="Laser"> Laser</label>
+                <label class="yn-lbl chk-outro"><input type="checkbox" name="d-metodo" value="Outro"> Outro</label>
+                <input type="text" class="hist-outro-input" id="d-metodo-outro" placeholder="Especifique...">
+              </div>
+            </div>
+          </div>
+
+          <!-- 2 -->
+          <div class="hist-q">
+            <div class="hist-q-label"><span class="hist-num">2</span> Tem alguma alergia a produtos de depilação ou sensibilidade na pele?</div>
+            <div class="hist-yn">
+              <label class="yn-lbl"><input type="radio" name="d-alergia" value="SIM"> SIM</label>
+              <label class="yn-lbl"><input type="radio" name="d-alergia" value="NÃO"> NÃO</label>
+            </div>
+            <div class="hist-sub">
+              <label class="hist-sub-label">Se sim, especifique:</label>
+              <input type="text" class="hist-text-input" id="d-alergia-esp" placeholder="Descrição da alergia...">
+            </div>
+          </div>
+
+          <!-- 3 -->
+          <div class="hist-q">
+            <div class="hist-q-label"><span class="hist-num">3</span> Qual é a área que deseja depilar hoje?</div>
+            <input type="text" class="hist-text-input" id="d-area" placeholder="Ex: pernas, axilas, virilha...">
+          </div>
+
+          <!-- 4 -->
+          <div class="hist-q">
+            <div class="hist-q-label"><span class="hist-num">4</span> Está a tomar algum medicamento ou usando produtos tópicos que possam afetar a depilação?</div>
+            <div class="hist-yn">
+              <label class="yn-lbl"><input type="radio" name="d-medic" value="SIM"> SIM</label>
+              <label class="yn-lbl"><input type="radio" name="d-medic" value="NÃO"> NÃO</label>
+            </div>
+          </div>
+
+          <!-- 5 -->
+          <div class="hist-q">
+            <div class="hist-q-label"><span class="hist-num">5</span> Teve alguma reação adversa à depilação no passado?</div>
+            <div class="hist-checks">
+              <label class="yn-lbl"><input type="checkbox" name="d-reacao" value="Irritação"> Irritação</label>
+              <label class="yn-lbl"><input type="checkbox" name="d-reacao" value="Pelos encravados"> Pelos encravados</label>
+              <label class="yn-lbl"><input type="checkbox" name="d-reacao" value="Queimaduras"> Queimaduras</label>
+              <label class="yn-lbl chk-outro"><input type="checkbox" name="d-reacao" value="Outro"> Outro</label>
+              <input type="text" class="hist-outro-input" id="d-reacao-outro" placeholder="Especifique...">
+            </div>
+          </div>
+
+          <!-- 6 -->
+          <div class="hist-q">
+            <div class="hist-q-label"><span class="hist-num">6</span> Com que frequência faz depilação?</div>
+            <input type="text" class="hist-text-input" id="d-freq" placeholder="Ex: mensal, quinzenal...">
+          </div>
+
+          <!-- 7 -->
+          <div class="hist-q">
+            <div class="hist-q-label"><span class="hist-num">7</span> Qual é o seu objetivo com a depilação?</div>
+            <div class="hist-checks">
+              <label class="yn-lbl"><input type="checkbox" name="d-obj" value="Remoção temporária"> Remoção temporária</label>
+              <label class="yn-lbl"><input type="checkbox" name="d-obj" value="Redução permanente"> Redução permanente</label>
+              <label class="yn-lbl"><input type="checkbox" name="d-obj" value="Manutenção"> Manutenção</label>
+              <label class="yn-lbl chk-outro"><input type="checkbox" name="d-obj" value="Outro"> Outro</label>
+              <input type="text" class="hist-outro-input" id="d-obj-outro" placeholder="Especifique...">
+            </div>
+          </div>
+
+          <!-- 8 -->
+          <div class="hist-q">
+            <div class="hist-q-label"><span class="hist-num">8</span> Está grávida ou a amamentar?</div>
+            <div class="hist-yn">
+              <label class="yn-lbl"><input type="radio" name="d-gravida" value="SIM"> SIM</label>
+              <label class="yn-lbl"><input type="radio" name="d-gravida" value="NÃO"> NÃO</label>
+            </div>
+          </div>
+
+        </div><!-- /hist-block -->
       </div>
 
       <div class="form-card">
@@ -216,6 +322,20 @@
           <div class="field-group full"><label>Morada</label><input type="text" id="l-morada" placeholder="Rua, nº, Localidade"></div>
           <div class="field-group"><label>E-mail</label><input type="email" id="l-email" placeholder="email@exemplo.com"></div>
           <div class="field-group"><label>Doc. Identificação (NIF/BI/Passaporte)</label><input type="text" id="l-doc" placeholder="Nº documento"></div>
+          <div class="field-group full"><label>Nacionalidade</label>
+            <div class="nac-wrapper" id="nac-l">
+              <div class="nac-display" onclick="toggleNac('l')">
+                <span class="nac-flag" id="nac-flag-l"></span>
+                <span class="nac-label" id="nac-lbl-l">Selecionar país…</span>
+                <span class="nac-arrow">▾</span>
+              </div>
+              <div class="nac-dropdown" id="nac-drop-l" style="display:none;">
+                <input type="text" class="nac-search" placeholder="🔍 Pesquisar país…" oninput="filterNac('l',this.value)" autocomplete="off">
+                <div class="nac-list" id="nac-list-l"></div>
+              </div>
+              <input type="hidden" id="l-nac" name="l-nac">
+            </div>
+          </div>
         </div>
       </div>
 
@@ -306,7 +426,21 @@
           <div class="field-group"><label>Telefone</label><input type="tel" id="m-tel" placeholder="+351 ..."></div>
           <div class="field-group full"><label>Morada</label><input type="text" id="m-morada" placeholder="Rua, nº, Localidade"></div>
           <div class="field-group"><label>E-mail</label><input type="email" id="m-email" placeholder="email@exemplo.com"></div>
-          <div class="field-group"><label>Ocupação</label><input type="text" id="m-ocupacao" placeholder="Profissão"></div>
+          <div class="field-group"><label>Doc. Identificação (NIF/BI/Passaporte)</label><input type="text" id="m-doc" placeholder="Nº documento"></div>
+          <div class="field-group full"><label>Nacionalidade</label>
+            <div class="nac-wrapper" id="nac-m">
+              <div class="nac-display" onclick="toggleNac('m')">
+                <span class="nac-flag" id="nac-flag-m"></span>
+                <span class="nac-label" id="nac-lbl-m">Selecionar país…</span>
+                <span class="nac-arrow">▾</span>
+              </div>
+              <div class="nac-dropdown" id="nac-drop-m" style="display:none;">
+                <input type="text" class="nac-search" placeholder="🔍 Pesquisar país…" oninput="filterNac('m',this.value)" autocomplete="off">
+                <div class="nac-list" id="nac-list-m"></div>
+              </div>
+              <input type="hidden" id="m-nac" name="m-nac">
+            </div>
+          </div>
         </div>
       </div>
 
