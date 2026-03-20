@@ -223,6 +223,7 @@ function collectForm() {
       nome: val('p-nome'), nasc: val('p-nasc'), idade: val('p-idade'),
       sexo: val('p-sexo'), tel: val('p-tel'), morada: val('p-morada'),
       email: val('p-email'), doc: val('p-doc'),
+      nac: val('p-nac'),
       estilo: val('p-estilo'), curv: val('p-curvatura'),
       esp: val('p-espessura'), modelo: val('p-modelo'), data: val('p-data'),
       gest: getRadio('p-gestante'), gestObs: obs(0),
@@ -241,6 +242,7 @@ function collectForm() {
       nome: val('d-nome'), nasc: val('d-nasc'), idade: val('d-idade'),
       sexo: val('d-sexo'), tel: val('d-tel'), morada: val('d-morada'),
       email: val('d-email'), doc: val('d-doc'),
+      nac: val('d-nac'),
       h1: val('d-h1'), h2: val('d-h2'), h3: val('d-h3'), h4: val('d-h4'),
       h5: val('d-h5'), h6: val('d-h6'), h7: val('d-h7'), h8: val('d-h8'),
       obs: val('d-obs'),
@@ -259,6 +261,7 @@ function collectForm() {
       nome: val('l-nome'), nasc: val('l-nasc'), idade: val('l-idade'),
       sexo: val('l-sexo'), tel: val('l-tel'), morada: val('l-morada'),
       email: val('l-email'), doc: val('l-doc'),
+      nac: val('l-nac'),
       saude: getRadio('l-saude'), pele: getRadio('l-pele'),
       grav: getRadio('l-grav'),   ama: getRadio('l-ama'),
       prot: getRadio('l-prot'),   coag: getRadio('l-coag'),
@@ -287,7 +290,8 @@ function collectForm() {
       proc: 'manicure', dataRegisto: now,
       nome: val('m-nome'), nasc: val('m-nasc'), idade: val('m-idade'),
       sexo: val('m-sexo'), tel: val('m-tel'), morada: val('m-morada'),
-      email: val('m-email'), ocupacao: val('m-ocupacao'),
+      email: val('m-email'), doc: val('m-doc'),
+      nac: val('m-nac'),
       // informações de saúde
       alergia: getRadio('m-alergia'),
       alergiaEsp: val('m-alergia-esp'), alergiaMarca: val('m-alergia-marca'),
@@ -326,6 +330,7 @@ function populateForm(d) {
     document.getElementById('p-idade').value = d.nasc ? calcIdade(d.nasc) : (d.idade || '');
     setVal('p-sexo', d.sexo); setVal('p-tel', d.tel);
     setVal('p-morada', d.morada); setVal('p-email', d.email); setVal('p-doc', d.doc);
+    setNac('p', d.nac);
     setVal('p-estilo', d.estilo); setVal('p-curvatura', d.curv);
     setVal('p-espessura', d.esp); setVal('p-modelo', d.modelo); setVal('p-data', d.data);
     setRadio('p-gestante', d.gest); setRadio('p-proced', d.proc_ol);
@@ -344,6 +349,7 @@ function populateForm(d) {
     document.getElementById('d-idade').value = d.nasc ? calcIdade(d.nasc) : (d.idade || '');
     setVal('d-sexo', d.sexo); setVal('d-tel', d.tel);
     setVal('d-morada', d.morada); setVal('d-email', d.email); setVal('d-doc', d.doc);
+    setNac('d', d.nac);
     ['h1','h2','h3','h4','h5','h6','h7','h8','obs'].forEach(k => setVal('d-'+k, d[k]));
     setRadio('d-imagem', d.imgAuth);
   }
@@ -353,6 +359,7 @@ function populateForm(d) {
     document.getElementById('l-idade').value = d.nasc ? calcIdade(d.nasc) : (d.idade || '');
     setVal('l-sexo', d.sexo); setVal('l-tel', d.tel);
     setVal('l-morada', d.morada); setVal('l-email', d.email); setVal('l-doc', d.doc);
+    setNac('l', d.nac);
     setVal('l-zonas-prev', d.zonasPrev); setVal('l-ultima', d.ultima);
     setVal('l-obs', d.obs); setVal('l-data-inicio', d.dataInicio);
     ['saude','pele','grav','ama','prot','coag','neuro','onco','cola','trat','tatu',
@@ -370,7 +377,7 @@ function populateForm(d) {
     document.getElementById('m-idade').value = d.nasc ? calcIdade(d.nasc) : (d.idade || '');
     setVal('m-sexo', d.sexo); setVal('m-tel', d.tel);
     setVal('m-morada', d.morada); setVal('m-email', d.email);
-    setVal('m-ocupacao', d.ocupacao);
+    setVal('m-doc', d.doc); setNac('m', d.nac);
     setRadio('m-alergia', d.alergia); setVal('m-alergia-esp', d.alergiaEsp);
     setVal('m-alergia-marca', d.alergiaMarca);
     setRadio('m-condicao', d.condicao); setVal('m-condicao-esp', d.condicaoEsp);
@@ -541,13 +548,13 @@ function printHeader(title) {
 }
 
 /* ── Bloco de Dados da Cliente (comum a todas as fichas) ── */
-function dadosClienteBlock(d, prefix) {
-  // prefix = 'p'|'d'|'l'|'m' — all have same fields after normalisation
+function dadosClienteBlock(d) {
+  const nacDisplay = getNacDisplay(d.nac || '');
   return makeFields([
     [['Nome:', d.nome, 2], ['Data de Nascimento:', formatDate(d.nasc)]],
     [['Idade:', d.idade], ['Sexo:', d.sexo], ['Telefone:', d.tel]],
     [['Morada:', d.morada, 2], ['E-mail:', d.email, 1.5]],
-    [['Doc. Identificação (NIF/BI/Passaporte):', d.doc || d.ocupacao || '']],
+    [['Doc. Identificação (NIF/BI/Passaporte):', d.doc], ['Nacionalidade:', nacDisplay, 1.2]],
   ]);
 }
 
@@ -860,6 +867,220 @@ function getPrintCSS() {
     @media print{@page{size:A4 portrait;margin:0;}body{margin:0;}.pd-page{margin:0;width:100%;min-height:100vh;}}
   `;
 }
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DROPDOWN DE NACIONALIDADE
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Top countries always shown first */
+const NAC_TOP = [
+  { code:'BR', flag:'🇧🇷', name:'Brasil' },
+  { code:'PT', flag:'🇵🇹', name:'Portugal' },
+  { code:'AO', flag:'🇦🇴', name:'Angola' },
+  { code:'FR', flag:'🇫🇷', name:'França' },
+  { code:'GB', flag:'🇬🇧', name:'Grã-Bretanha (Inglaterra)' },
+  { code:'UA', flag:'🇺🇦', name:'Ucrânia' },
+  { code:'IN', flag:'🇮🇳', name:'Índia' },
+  { code:'CV', flag:'🇨🇻', name:'Cabo Verde' },
+  { code:'MZ', flag:'🇲🇿', name:'Moçambique' },
+  { code:'ES', flag:'🇪🇸', name:'Espanha' },
+];
+
+/* All other countries — alphabetical */
+const NAC_ALL = [
+  {code:'AF',flag:'🇦🇫',name:'Afeganistão'},{code:'ZA',flag:'🇿🇦',name:'África do Sul'},
+  {code:'AL',flag:'🇦🇱',name:'Albânia'},{code:'DE',flag:'🇩🇪',name:'Alemanha'},
+  {code:'AD',flag:'🇦🇩',name:'Andorra'},{code:'AG',flag:'🇦🇬',name:'Antígua e Barbuda'},
+  {code:'SA',flag:'🇸🇦',name:'Arábia Saudita'},{code:'DZ',flag:'🇩🇿',name:'Argélia'},
+  {code:'AR',flag:'🇦🇷',name:'Argentina'},{code:'AM',flag:'🇦🇲',name:'Arménia'},
+  {code:'AU',flag:'🇦🇺',name:'Austrália'},{code:'AT',flag:'🇦🇹',name:'Áustria'},
+  {code:'AZ',flag:'🇦🇿',name:'Azerbaijão'},{code:'BS',flag:'🇧🇸',name:'Bahamas'},
+  {code:'BD',flag:'🇧🇩',name:'Bangladesh'},{code:'BB',flag:'🇧🇧',name:'Barbados'},
+  {code:'BE',flag:'🇧🇪',name:'Bélgica'},{code:'BZ',flag:'🇧🇿',name:'Belize'},
+  {code:'BJ',flag:'🇧🇯',name:'Benim'},{code:'BO',flag:'🇧🇴',name:'Bolívia'},
+  {code:'BA',flag:'🇧🇦',name:'Bósnia e Herzegovina'},{code:'BW',flag:'🇧🇼',name:'Botswana'},
+  {code:'BN',flag:'🇧🇳',name:'Brunei'},{code:'BG',flag:'🇧🇬',name:'Bulgária'},
+  {code:'BF',flag:'🇧🇫',name:'Burkina Faso'},{code:'BI',flag:'🇧🇮',name:'Burundi'},
+  {code:'BT',flag:'🇧🇹',name:'Butão'},{code:'KH',flag:'🇰🇭',name:'Camboja'},
+  {code:'CM',flag:'🇨🇲',name:'Camarões'},{code:'CA',flag:'🇨🇦',name:'Canadá'},
+  {code:'QA',flag:'🇶🇦',name:'Catar'},{code:'KZ',flag:'🇰🇿',name:'Cazaquistão'},
+  {code:'TD',flag:'🇹🇩',name:'Chade'},{code:'CL',flag:'🇨🇱',name:'Chile'},
+  {code:'CN',flag:'🇨🇳',name:'China'},{code:'CY',flag:'🇨🇾',name:'Chipre'},
+  {code:'CO',flag:'🇨🇴',name:'Colômbia'},{code:'KM',flag:'🇰🇲',name:'Comores'},
+  {code:'CG',flag:'🇨🇬',name:'Congo'},{code:'CD',flag:'🇨🇩',name:'Congo (RDC)'},
+  {code:'KP',flag:'🇰🇵',name:'Coreia do Norte'},{code:'KR',flag:'🇰🇷',name:'Coreia do Sul'},
+  {code:'CI',flag:'🇨🇮',name:"Costa do Marfim"},{code:'CR',flag:'🇨🇷',name:'Costa Rica'},
+  {code:'HR',flag:'🇭🇷',name:'Croácia'},{code:'CU',flag:'🇨🇺',name:'Cuba'},
+  {code:'DK',flag:'🇩🇰',name:'Dinamarca'},{code:'DJ',flag:'🇩🇯',name:'Djibouti'},
+  {code:'DM',flag:'🇩🇲',name:'Dominica'},{code:'EG',flag:'🇪🇬',name:'Egito'},
+  {code:'AE',flag:'🇦🇪',name:'Emirados Árabes Unidos'},{code:'EC',flag:'🇪🇨',name:'Equador'},
+  {code:'ER',flag:'🇪🇷',name:'Eritreia'},{code:'SK',flag:'🇸🇰',name:'Eslováquia'},
+  {code:'SI',flag:'🇸🇮',name:'Eslovênia'},{code:'SZ',flag:'🇸🇿',name:'Essuatíni'},
+  {code:'ET',flag:'🇪🇹',name:'Etiópia'},{code:'FJ',flag:'🇫🇯',name:'Fiji'},
+  {code:'PH',flag:'🇵🇭',name:'Filipinas'},{code:'FI',flag:'🇫🇮',name:'Finlândia'},
+  {code:'GA',flag:'🇬🇦',name:'Gabão'},{code:'GM',flag:'🇬🇲',name:'Gâmbia'},
+  {code:'GH',flag:'🇬🇭',name:'Gana'},{code:'GE',flag:'🇬🇪',name:'Geórgia'},
+  {code:'GD',flag:'🇬🇩',name:'Granada'},{code:'GR',flag:'🇬🇷',name:'Grécia'},
+  {code:'GT',flag:'🇬🇹',name:'Guatemala'},{code:'GN',flag:'🇬🇳',name:'Guiné'},
+  {code:'GW',flag:'🇬🇼',name:'Guiné-Bissau'},{code:'GQ',flag:'🇬🇶',name:'Guiné Equatorial'},
+  {code:'GY',flag:'🇬🇾',name:'Guiana'},{code:'HT',flag:'🇭🇹',name:'Haiti'},
+  {code:'HN',flag:'🇭🇳',name:'Honduras'},{code:'HU',flag:'🇭🇺',name:'Hungria'},
+  {code:'YE',flag:'🇾🇪',name:'Iémen'},{code:'MH',flag:'🇲🇭',name:'Ilhas Marshall'},
+  {code:'ID',flag:'🇮🇩',name:'Indonésia'},{code:'IQ',flag:'🇮🇶',name:'Iraque'},
+  {code:'IR',flag:'🇮🇷',name:'Irão'},{code:'IE',flag:'🇮🇪',name:'Irlanda'},
+  {code:'IS',flag:'🇮🇸',name:'Islândia'},{code:'IL',flag:'🇮🇱',name:'Israel'},
+  {code:'IT',flag:'🇮🇹',name:'Itália'},{code:'JM',flag:'🇯🇲',name:'Jamaica'},
+  {code:'JP',flag:'🇯🇵',name:'Japão'},{code:'JO',flag:'🇯🇴',name:'Jordânia'},
+  {code:'KE',flag:'🇰🇪',name:'Quénia'},{code:'KW',flag:'🇰🇼',name:'Kuwait'},
+  {code:'LA',flag:'🇱🇦',name:'Laos'},{code:'LS',flag:'🇱🇸',name:'Lesoto'},
+  {code:'LV',flag:'🇱🇻',name:'Letónia'},{code:'LB',flag:'🇱🇧',name:'Líbano'},
+  {code:'LR',flag:'🇱🇷',name:'Libéria'},{code:'LY',flag:'🇱🇾',name:'Líbia'},
+  {code:'LI',flag:'🇱🇮',name:'Liechtenstein'},{code:'LT',flag:'🇱🇹',name:'Lituânia'},
+  {code:'LU',flag:'🇱🇺',name:'Luxemburgo'},{code:'MK',flag:'🇲🇰',name:'Macedónia do Norte'},
+  {code:'MG',flag:'🇲🇬',name:'Madagáscar'},{code:'MW',flag:'🇲🇼',name:'Malawi'},
+  {code:'MY',flag:'🇲🇾',name:'Malásia'},{code:'MV',flag:'🇲🇻',name:'Maldivas'},
+  {code:'ML',flag:'🇲🇱',name:'Mali'},{code:'MT',flag:'🇲🇹',name:'Malta'},
+  {code:'MA',flag:'🇲🇦',name:'Marrocos'},{code:'MR',flag:'🇲🇷',name:'Mauritânia'},
+  {code:'MU',flag:'🇲🇺',name:'Maurícia'},{code:'MX',flag:'🇲🇽',name:'México'},
+  {code:'FM',flag:'🇫🇲',name:'Micronésia'},{code:'MD',flag:'🇲🇩',name:'Moldávia'},
+  {code:'MC',flag:'🇲🇨',name:'Mónaco'},{code:'MN',flag:'🇲🇳',name:'Mongólia'},
+  {code:'ME',flag:'🇲🇪',name:'Montenegro'},{code:'MM',flag:'🇲🇲',name:'Myanmar'},
+  {code:'NA',flag:'🇳🇦',name:'Namíbia'},{code:'NR',flag:'🇳🇷',name:'Nauru'},
+  {code:'NP',flag:'🇳🇵',name:'Nepal'},{code:'NI',flag:'🇳🇮',name:'Nicarágua'},
+  {code:'NE',flag:'🇳🇪',name:'Níger'},{code:'NG',flag:'🇳🇬',name:'Nigéria'},
+  {code:'NO',flag:'🇳🇴',name:'Noruega'},{code:'NZ',flag:'🇳🇿',name:'Nova Zelândia'},
+  {code:'OM',flag:'🇴🇲',name:'Omã'},{code:'NL',flag:'🇳🇱',name:'Países Baixos'},
+  {code:'PW',flag:'🇵🇼',name:'Palau'},{code:'PA',flag:'🇵🇦',name:'Panamá'},
+  {code:'PG',flag:'🇵🇬',name:'Papua Nova Guiné'},{code:'PK',flag:'🇵🇰',name:'Paquistão'},
+  {code:'PY',flag:'🇵🇾',name:'Paraguai'},{code:'PE',flag:'🇵🇪',name:'Peru'},
+  {code:'PL',flag:'🇵🇱',name:'Polónia'},{code:'PR',flag:'🇵🇷',name:'Porto Rico'},
+  {code:'CF',flag:'🇨🇫',name:'República Centro-Africana'},{code:'DO',flag:'🇩🇴',name:'República Dominicana'},
+  {code:'CZ',flag:'🇨🇿',name:'República Checa'},{code:'RO',flag:'🇷🇴',name:'Roménia'},
+  {code:'RW',flag:'🇷🇼',name:'Ruanda'},{code:'RU',flag:'🇷🇺',name:'Rússia'},
+  {code:'WS',flag:'🇼🇸',name:'Samoa'},{code:'LC',flag:'🇱🇨',name:'Santa Lúcia'},
+  {code:'ST',flag:'🇸🇹',name:'São Tomé e Príncipe'},{code:'VC',flag:'🇻🇨',name:'São Vicente e Granadinas'},
+  {code:'SN',flag:'🇸🇳',name:'Senegal'},{code:'SL',flag:'🇸🇱',name:'Serra Leoa'},
+  {code:'RS',flag:'🇷🇸',name:'Sérvia'},{code:'SC',flag:'🇸🇨',name:'Seychelles'},
+  {code:'SG',flag:'🇸🇬',name:'Singapura'},{code:'SY',flag:'🇸🇾',name:'Síria'},
+  {code:'SO',flag:'🇸🇴',name:'Somália'},{code:'LK',flag:'🇱🇰',name:'Sri Lanka'},
+  {code:'SD',flag:'🇸🇩',name:'Sudão'},{code:'SS',flag:'🇸🇸',name:'Sudão do Sul'},
+  {code:'SE',flag:'🇸🇪',name:'Suécia'},{code:'CH',flag:'🇨🇭',name:'Suíça'},
+  {code:'SR',flag:'🇸🇷',name:'Suriname'},{code:'TH',flag:'🇹🇭',name:'Tailândia'},
+  {code:'TW',flag:'🇹🇼',name:'Taiwan'},{code:'TZ',flag:'🇹🇿',name:'Tanzânia'},
+  {code:'TJ',flag:'🇹🇯',name:'Tajiquistão'},{code:'TL',flag:'🇹🇱',name:'Timor-Leste'},
+  {code:'TG',flag:'🇹🇬',name:'Togo'},{code:'TO',flag:'🇹🇴',name:'Tonga'},
+  {code:'TT',flag:'🇹🇹',name:'Trindade e Tobago'},{code:'TN',flag:'🇹🇳',name:'Tunísia'},
+  {code:'TM',flag:'🇹🇲',name:'Turquemenistão'},{code:'TR',flag:'🇹🇷',name:'Turquia'},
+  {code:'TV',flag:'🇹🇻',name:'Tuvalu'},{code:'UG',flag:'🇺🇬',name:'Uganda'},
+  {code:'UY',flag:'🇺🇾',name:'Uruguai'},{code:'UZ',flag:'🇺🇿',name:'Usbequistão'},
+  {code:'VU',flag:'🇻🇺',name:'Vanuatu'},{code:'VA',flag:'🇻🇦',name:'Vaticano'},
+  {code:'VE',flag:'🇻🇪',name:'Venezuela'},{code:'VN',flag:'🇻🇳',name:'Vietname'},
+  {code:'ZM',flag:'🇿🇲',name:'Zâmbia'},{code:'ZW',flag:'🇿🇼',name:'Zimbabué'},
+];
+
+/* Build the filtered list HTML */
+function nacListHTML(pfx, query) {
+  query = (query || '').toLowerCase().trim();
+  const topCodes = new Set(NAC_TOP.map(c => c.code));
+  const matches  = c => c.name.toLowerCase().includes(query) || c.code.toLowerCase().includes(query);
+
+  const topFiltered  = NAC_TOP.filter(matches);
+  const restFiltered = NAC_ALL.filter(c => !topCodes.has(c.code) && matches(c));
+  const selVal = document.getElementById(pfx + '-nac')?.value || '';
+
+  const item = c => `<div class="nac-item${c.code===selVal?' selected':''}" onclick="selectNac('${pfx}','${c.code}','${c.flag}','${c.name.replace(/'/g,"\\'")}')">
+    <span class="nac-item-flag">${c.flag}</span>
+    <span class="nac-item-name">${c.name}</span>
+  </div>`;
+
+  let html = '';
+  if (topFiltered.length) {
+    if (!query) html += '<div class="nac-group-label">Mais frequentes</div>';
+    html += topFiltered.map(item).join('');
+    if (restFiltered.length) html += '<hr class="nac-separator">';
+    if (!query) html += '<div class="nac-group-label">Todos os países</div>';
+  }
+  html += restFiltered.map(item).join('');
+  if (!html) html = '<div style="padding:10px 14px;color:#aaa;font-size:12px;">Nenhum país encontrado</div>';
+  return html;
+}
+
+/* Initialise a dropdown (called on first open) */
+function initNac(pfx) {
+  const list = document.getElementById('nac-list-' + pfx);
+  if (list && !list.dataset.built) {
+    list.innerHTML = nacListHTML(pfx, '');
+    list.dataset.built = '1';
+  }
+}
+
+function toggleNac(pfx) {
+  const wrap = document.getElementById('nac-' + pfx);
+  const drop = document.getElementById('nac-drop-' + pfx);
+  const search = drop.querySelector('.nac-search');
+  const isOpen = wrap.classList.contains('open');
+
+  // close all other open dropdowns
+  document.querySelectorAll('.nac-wrapper.open').forEach(w => {
+    w.classList.remove('open');
+    w.querySelector('.nac-dropdown').style.display = 'none';
+  });
+
+  if (!isOpen) {
+    wrap.classList.add('open');
+    drop.style.display = 'block';
+    initNac(pfx);
+    if (search) { search.value = ''; search.focus(); }
+  }
+}
+
+function filterNac(pfx, query) {
+  const list = document.getElementById('nac-list-' + pfx);
+  if (list) list.innerHTML = nacListHTML(pfx, query);
+}
+
+function selectNac(pfx, code, flag, name) {
+  document.getElementById(pfx + '-nac').value = code;
+  const lbl  = document.getElementById('nac-lbl-' + pfx);
+  const flg  = document.getElementById('nac-flag-' + pfx);
+  if (lbl)  { lbl.textContent = name; lbl.classList.remove('placeholder'); }
+  if (flg)  { flg.textContent = flag; }
+  // close
+  const wrap = document.getElementById('nac-' + pfx);
+  const drop = document.getElementById('nac-drop-' + pfx);
+  if (wrap) wrap.classList.remove('open');
+  if (drop) drop.style.display = 'none';
+  // rebuild list to update selected state
+  const list = document.getElementById('nac-list-' + pfx);
+  if (list) { list.innerHTML = nacListHTML(pfx, ''); }
+}
+
+/* Set nationality value (for populateForm) */
+function setNac(pfx, code) {
+  if (!code) return;
+  const all = [...NAC_TOP, ...NAC_ALL];
+  const c   = all.find(x => x.code === code);
+  if (c) selectNac(pfx, c.code, c.flag, c.name);
+}
+
+/* Get nationality display string for printing */
+function getNacDisplay(code) {
+  if (!code) return '';
+  const all = [...NAC_TOP, ...NAC_ALL];
+  const c   = all.find(x => x.code === code);
+  return c ? c.flag + ' ' + c.name : code;
+}
+
+/* Close dropdown when clicking outside */
+document.addEventListener('click', e => {
+  if (!e.target.closest('.nac-wrapper')) {
+    document.querySelectorAll('.nac-wrapper.open').forEach(w => {
+      w.classList.remove('open');
+      w.querySelector('.nac-dropdown').style.display = 'none';
+    });
+  }
+});
 
 /* ══════════════════════════════════════════════════════════════════════════
    INIT
