@@ -509,19 +509,23 @@ function fieldLine(label, value, flex) {
 }
 
 function logoSVG() {
-  return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:52px;height:52px;flex-shrink:0;">
-    <circle cx="100" cy="100" r="100" fill="#e0185e"/>
-    <line x1="100" y1="39" x2="100" y2="18" stroke="white" stroke-width="6.5" stroke-linecap="round"/>
-    <line x1="100" y1="39" x2="125" y2="21" stroke="white" stroke-width="4.8" stroke-linecap="round"/>
-    <line x1="100" y1="39" x2="75"  y2="21" stroke="white" stroke-width="4.8" stroke-linecap="round"/>
-    <line x1="100" y1="39" x2="147" y2="29" stroke="white" stroke-width="4.2" stroke-linecap="round"/>
-    <line x1="100" y1="39" x2="53"  y2="29" stroke="white" stroke-width="4.2" stroke-linecap="round"/>
-    <line x1="100" y1="39" x2="163" y2="45" stroke="white" stroke-width="3.6" stroke-linecap="round"/>
-    <line x1="100" y1="39" x2="37"  y2="45" stroke="white" stroke-width="3.6" stroke-linecap="round"/>
-    <path d="M38,112 Q100,85 162,112 Q100,139 38,112Z" fill="white"/>
-    <circle cx="100" cy="112" r="22" fill="#e0185e"/>
-    <circle cx="100" cy="112" r="15.8" fill="none" stroke="white" stroke-width="3.4"/>
-    <path d="M100,116.3 C100,116.3 91.4,107.7 91.4,103.2 C91.4,99.5 94.7,98.6 100,103.9 C105.3,98.6 108.6,99.5 108.6,103.2 C108.6,107.7 100,116.3 100,116.3Z" fill="white"/>
+  return `<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="width:54px;height:54px;flex-shrink:0;">
+    <rect x="0" y="0" width="500" height="500" rx="60" ry="60" fill="#FFF1F2"/>
+    <rect x="5" y="5" width="490" height="490" rx="57" ry="57" fill="none" stroke="#E46589" stroke-width="10"/>
+    <g stroke="#E46589" stroke-linecap="round">
+      <line x1="250" y1="152" x2="250" y2="67"  stroke-width="7.5"/>
+      <line x1="250" y1="152" x2="291" y2="72"  stroke-width="5.5"/>
+      <line x1="250" y1="152" x2="209" y2="72"  stroke-width="5.5"/>
+      <line x1="250" y1="152" x2="329" y2="86"  stroke-width="5.0"/>
+      <line x1="250" y1="152" x2="171" y2="86"  stroke-width="5.0"/>
+      <line x1="250" y1="152" x2="361" y2="108" stroke-width="4.5"/>
+      <line x1="250" y1="152" x2="139" y2="108" stroke-width="4.5"/>
+      <line x1="250" y1="152" x2="387" y2="137" stroke-width="4.0"/>
+      <line x1="250" y1="152" x2="113" y2="137" stroke-width="4.0"/>
+    </g>
+    <path d="M104,208 Q250,157 396,208 Q250,259 104,208Z" fill="#FFF1F2" stroke="#E46589" stroke-width="11"/>
+    <circle cx="250" cy="234" r="59" fill="#FFF1F2" stroke="#E46589" stroke-width="9.5"/>
+    <path d="M250,274 C250,274 208,248 200,231 C193,217 200,207 213,207 C224,207 237,216 250,228 C263,216 276,207 287,207 C300,207 307,217 300,231 C292,248 250,274 250,274Z" fill="#E46589"/>
   </svg>`;
 }
 
