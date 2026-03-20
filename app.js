@@ -89,6 +89,7 @@ function openForm(proc) {
   document.getElementById('form-' + proc).style.display = 'block';
   document.getElementById('form-title-bar').textContent  = 'Ficha de Anamnese – ' + TITLES[proc];
   clearFormFields();
+  initSignaturePad(proc[0]);   // init canvas for this form's prefix
   window.scrollTo(0, 0);
 }
 
@@ -157,6 +158,7 @@ async function openFicha(id) {
   document.getElementById('form-title-bar').textContent = 'Ficha de Anamnese – ' + TITLES[ficha.proc];
   clearFormFields();
   populateForm(ficha);
+  initSignaturePad(ficha.proc[0]);
   window.scrollTo(0, 0);
 }
 
@@ -233,6 +235,7 @@ function collectForm() {
       cAler: getRadio('c-alergia'), cOcul: getRadio('c-ocular'),
       cCiru: getRadio('c-cirurgia'), cLent: getRadio('c-lentes'), cIrri: getRadio('c-irritacao'),
       imgAuth: getRadio('p-imagem'),
+      sigDataURL: sigGetDataURL('p'),
     };
   }
 
@@ -265,6 +268,7 @@ function collectForm() {
       // Q8
       gravida:     getRadio('d-gravida'),
       imgAuth:     getRadio('d-imagem'),
+      sigDataURL:  sigGetDataURL('d'),
     };
   }
 
@@ -299,6 +303,7 @@ function collectForm() {
       foto: getRadio('l-foto'), obs: val('l-obs'),
       dataInicio: val('l-data-inicio'),
       imgAuth: getRadio('l-imagem'),
+      sigDataURL: sigGetDataURL('l'),
       sessions,
     };
   }
@@ -324,6 +329,7 @@ function collectForm() {
       pergunta: getRadio('m-pergunta'), perguntaEsp: val('m-pergunta-esp'),
       data: val('m-data'),
       imgAuth: getRadio('m-imagem'),
+      sigDataURL: sigGetDataURL('m'),
     };
   }
 }
@@ -360,6 +366,7 @@ function populateForm(d) {
     const ynRows = document.querySelectorAll('#form-pestanas .yn-row');
     if (ynRows[0]) { const o = ynRows[0].querySelector('.yn-obs'); if (o) o.value = d.gestObs || ''; }
     if (ynRows[2]) { const o = ynRows[2].querySelector('.yn-obs'); if (o) o.value = d.alerObs || ''; }
+    if (d.sigDataURL) setTimeout(() => sigSetDataURL('p', d.sigDataURL), 100);
   }
 
   if (d.proc === 'depilacao') {
@@ -389,6 +396,7 @@ function populateForm(d) {
     // Q8
     setRadio('d-gravida', d.gravida);
     setRadio('d-imagem', d.imgAuth);
+    if (d.sigDataURL) setTimeout(() => sigSetDataURL('d', d.sigDataURL), 100);
   }
 
   if (d.proc === 'laser') {
@@ -407,6 +415,7 @@ function populateForm(d) {
     tbody.innerHTML = '';
     (d.sessions || []).forEach((row, i) => addSessionRowWithData(row, i+1));
     if (!d.sessions?.length) addSessionRow();
+    if (d.sigDataURL) setTimeout(() => sigSetDataURL('l', d.sigDataURL), 100);
   }
 
   if (d.proc === 'manicure') {
@@ -429,6 +438,7 @@ function populateForm(d) {
     setRadio('m-manutencao', d.manutencao);
     setRadio('m-pergunta', d.pergunta); setVal('m-pergunta-esp', d.perguntaEsp);
     setVal('m-data', d.data); setRadio('m-imagem', d.imgAuth);
+    if (d.sigDataURL) setTimeout(() => sigSetDataURL('m', d.sigDataURL), 100);
   }
 }
 
@@ -442,6 +452,10 @@ function clearFormFields() {
     });
   const tbody = document.getElementById('sessions-tbody');
   if (tbody) { tbody.innerHTML = ''; addSessionRow(); }
+  // Clear signature pad
+  const pfx = currentProc[0];
+  sigClear(pfx);
+  if (_sig[pfx]) _sig[pfx].hasStroke = false;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -545,10 +559,18 @@ function makeYnTable(pairs) {
   }).join('')}</table>`;
 }
 
-function sigRow(blocks) {
-  return `<div class="pd-sign-row">${blocks.map(([desc,v])=>
-    `<div class="pd-sign-block"><div class="pd-sign-line">${v||''}</div><div class="pd-sign-desc">${desc}</div></div>`
-  ).join('')}</div>`;
+function sigRow(blocks, sigDataURL) {
+  return `<div class="pd-sign-row">${blocks.map(([desc,v], i) => {
+    // First block is always "Assinatura da Cliente" — render the image if available
+    const isClienteSig = i === 0 && sigDataURL;
+    const lineContent = isClienteSig
+      ? `<img src="${sigDataURL}" class="pd-sig-img" alt="Assinatura">`
+      : (v || '');
+    return `<div class="pd-sign-block">
+      <div class="pd-sign-line">${lineContent}</div>
+      <div class="pd-sign-desc">${desc}</div>
+    </div>`;
+  }).join('')}</div>`;
 }
 
 function logoSVG() {
@@ -635,7 +657,7 @@ function buildPestanasHTML(d) {
     ])}
     <div class="pd-section-title">PROCEDIMENTO</div>
     ${makeFields([[['Estilo:', d.estilo]],[['Curvatura:', d.curv],['Espessura:', d.esp],['Modelo dos fios:', d.modelo]]])}
-    ${sigRow([['Assinatura da Cliente',''],['Data do Procedimento', dataFmt]])}
+    ${sigRow([['Assinatura da Cliente',''],['Data do Procedimento', dataFmt]], d.sigDataURL)}
   </div>`;
 
   const p2 = `<div class="pd-page">
@@ -662,7 +684,7 @@ function buildPestanasHTML(d) {
       <p style="font-size:7.5pt;color:#888;"><i>RGPD: Dados recolhidos exclusivamente para gestão da ficha de cliente.</i></p>
     </div>
     ${imagemBlock(d.imgAuth)}
-    ${sigRow([['Assinatura da Cliente',''],['Assinatura da Técnica',''],['Data do Procedimento', dataFmt]])}
+    ${sigRow([['Assinatura da Cliente',''],['Assinatura da Técnica',''],['Data do Procedimento', dataFmt]], d.sigDataURL)}
   </div>`;
 
   return p1 + p2;
@@ -735,7 +757,7 @@ function buildDepilacaoHTML(d) {
       ${pYn('8) Está grávida ou a amamentar?', d.gravida)}
     </table>
     ${imagemBlock(d.imgAuth)}
-    ${sigRow([['Assinatura da Cliente',''],['Data','&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;']])}
+    ${sigRow([['Assinatura da Cliente',''],['Data','&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;']], d.sigDataURL)}
   </div>`;
 }
 
@@ -789,7 +811,7 @@ function buildLaserHTML(d) {
     <div style="border:1.5px solid #E46589;border-radius:3px;min-height:12mm;padding:5px 8px;font-size:9pt;">${d.obs||''}</div>
     <div style="margin:6mm 0 3mm;font-size:8.5pt;line-height:1.55;color:#333;">Tomei conhecimento de todas as precauções e contra-indicações do tratamento. Assumo comunicar em qualquer sessão qualquer alteração da minha situação.</div>
     ${imagemBlock(d.imgAuth)}
-    ${sigRow([['Assinatura da Cliente',''],['Assinatura da Técnica',''],['Data do Procedimento', dataFmt]])}
+    ${sigRow([['Assinatura da Cliente',''],['Assinatura da Técnica',''],['Data do Procedimento', dataFmt]], d.sigDataURL)}
   </div>`;
 
   const p2 = `<div class="pd-page">
@@ -868,7 +890,7 @@ function buildManicureHTML(d) {
       <b>Assinatura do Cliente:</b> Declaro que as informações fornecidas acima são verdadeiras e completas. Entendo os riscos e benefícios do alongamento de unhas e concordo com o procedimento.
     </div>
     ${imagemBlock(d.imgAuth)}
-    ${sigRow([['Assinatura da Cliente',''],['Profissional Responsável',''],['Data', dataFmt]])}
+    ${sigRow([['Assinatura da Cliente',''],['Profissional Responsável',''],['Data', dataFmt]], d.sigDataURL)}
   </div>`;
 
   return p1;
@@ -936,10 +958,154 @@ function getPrintCSS() {
     .pd-sessions-table th{background:#E46589;color:white;padding:5px 4px;text-align:center;font-size:7pt;}
     .pd-sessions-table td{border:1px solid #ddd;padding:5px 4px;text-align:center;}
     .pd-sessions-table tr:nth-child(even) td{background:#fff5f9;}
+    .pd-sig-img{max-width:180px;max-height:65px;display:block;margin:2px auto 0;object-fit:contain;}
     @media print{@page{size:A4 portrait;margin:0;}body{margin:0;}.pd-page{margin:0;width:100%;min-height:100vh;}}
   `;
 }
 
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ASSINATURA DIGITAL — Canvas pad
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const _sig = {};   // state per prefix: { drawing, lastX, lastY, hasStroke }
+
+function sigInit(pfx) {
+  const canvas = document.getElementById('sig-canvas-' + pfx);
+  if (!canvas || _sig[pfx]) return;   // already initialised
+
+  const state = { drawing: false, lastX: 0, lastY: 0, hasStroke: false };
+  _sig[pfx] = state;
+
+  // Size canvas pixels to match its CSS display size
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    const dpr  = window.devicePixelRatio || 1;
+    canvas.width  = rect.width  * dpr;
+    canvas.height = rect.height * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineWidth   = 2.2;
+    ctx.lineCap     = 'round';
+    ctx.lineJoin    = 'round';
+  }
+  resize();
+  new ResizeObserver(resize).observe(canvas);
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const src  = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+  }
+
+  function startDraw(e) {
+    e.preventDefault();
+    state.drawing = true;
+    const { x, y } = getPos(e);
+    state.lastX = x;
+    state.lastY = y;
+    const ctx = canvas.getContext('2d');
+    ctx.beginPath();
+    ctx.arc(x, y, 1.1, 0, Math.PI * 2);
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fill();
+    canvas.closest('.sig-canvas-wrap').classList.add('active');
+    hidePlaceholder(pfx);
+  }
+
+  function draw(e) {
+    if (!state.drawing) return;
+    e.preventDefault();
+    const { x, y } = getPos(e);
+    const ctx = canvas.getContext('2d');
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineWidth   = 2.2;
+    ctx.lineCap     = 'round';
+    ctx.lineJoin    = 'round';
+    ctx.beginPath();
+    ctx.moveTo(state.lastX, state.lastY);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    state.lastX = x;
+    state.lastY = y;
+    state.hasStroke = true;
+  }
+
+  function endDraw(e) {
+    if (!state.drawing) return;
+    state.drawing = false;
+    canvas.closest('.sig-canvas-wrap').classList.remove('active');
+    if (state.hasStroke) {
+      const status = document.getElementById('sig-status-' + pfx);
+      if (status) status.textContent = '✅ Assinatura registada';
+    }
+  }
+
+  // Pointer events (covers mouse, touch, stylus uniformly)
+  canvas.addEventListener('pointerdown', startDraw, { passive: false });
+  canvas.addEventListener('pointermove', draw,      { passive: false });
+  canvas.addEventListener('pointerup',   endDraw);
+  canvas.addEventListener('pointerleave', endDraw);
+  // Also handle touch explicitly for older iOS
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove',  draw,      { passive: false });
+  canvas.addEventListener('touchend',   endDraw);
+}
+
+function hidePlaceholder(pfx) {
+  const ph = document.getElementById('sig-ph-' + pfx);
+  if (ph) ph.classList.add('hidden');
+}
+
+function showPlaceholder(pfx) {
+  const ph = document.getElementById('sig-ph-' + pfx);
+  if (ph) ph.classList.remove('hidden');
+}
+
+function sigClear(pfx) {
+  const canvas = document.getElementById('sig-canvas-' + pfx);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (_sig[pfx]) _sig[pfx].hasStroke = false;
+  showPlaceholder(pfx);
+  const status = document.getElementById('sig-status-' + pfx);
+  if (status) status.textContent = '';
+}
+
+function sigGetDataURL(pfx) {
+  const canvas = document.getElementById('sig-canvas-' + pfx);
+  if (!canvas) return '';
+  if (_sig[pfx] && !_sig[pfx].hasStroke) return '';
+  return canvas.toDataURL('image/png');
+}
+
+function sigSetDataURL(pfx, dataURL) {
+  if (!dataURL) return;
+  const canvas = document.getElementById('sig-canvas-' + pfx);
+  if (!canvas) return;
+  const img = new Image();
+  img.onload = () => {
+    const ctx = canvas.getContext('2d');
+    // Draw at CSS display size
+    const rect = canvas.getBoundingClientRect();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, rect.width, rect.height);
+    if (_sig[pfx]) _sig[pfx].hasStroke = true;
+    hidePlaceholder(pfx);
+    const status = document.getElementById('sig-status-' + pfx);
+    if (status) status.textContent = '✅ Assinatura registada';
+  };
+  img.src = dataURL;
+}
+
+/* Initialise canvases when a form becomes visible */
+function initSignaturePad(pfx) {
+  // Small delay to ensure canvas is laid out and sized
+  setTimeout(() => sigInit(pfx), 80);
+}
 
 /* ══════════════════════════════════════════════════════════════════════════
    DROPDOWN DE NACIONALIDADE

@@ -1,7 +1,7 @@
 # 💗 Beleza Rara — Fichas de Anamnese Digital
 
 > Sistema web para preenchimento e impressão de fichas de anamnese  
-> **Beleza Rara · Valquiria Almeida** · Covilhã, Castelo Branco, Portugal
+> **Beleza Rara · Valquiria Almeida** · Fundão, Portugal
 
 ---
 
