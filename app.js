@@ -11,8 +11,9 @@ let db             = null;
    INDEXEDDB
    ══════════════════════════════════════════════════════════════════════════ */
 const DB_NAME    = 'belezaRaraDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;          // bumped: added clientes store
 const STORE      = 'fichas';
+const STORE_CLI  = 'clientes';
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -25,6 +26,10 @@ function openDB() {
         s.createIndex('proc', 'proc', { unique: false });
         s.createIndex('nome', 'nome', { unique: false });
         s.createIndex('data', 'dataRegisto', { unique: false });
+      }
+      if (!d.objectStoreNames.contains(STORE_CLI)) {
+        const c = d.createObjectStore(STORE_CLI, { keyPath: 'id', autoIncrement: true });
+        c.createIndex('nome', 'nome', { unique: false });
       }
     };
     req.onsuccess = e => { db = e.target.result; resolve(db); };
@@ -69,6 +74,41 @@ async function dbDelete(id) {
   });
 }
 
+/* ── Cliente CRUD ── */
+async function dbSaveCliente(rec) {
+  const d = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx  = d.transaction(STORE_CLI, 'readwrite');
+    const req = rec.id ? tx.objectStore(STORE_CLI).put(rec) : tx.objectStore(STORE_CLI).add(rec);
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+async function dbGetAllClientes() {
+  const d = await openDB();
+  return new Promise((resolve, reject) => {
+    const req = d.transaction(STORE_CLI, 'readonly').objectStore(STORE_CLI).getAll();
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+async function dbGetCliente(id) {
+  const d = await openDB();
+  return new Promise((resolve, reject) => {
+    const req = d.transaction(STORE_CLI, 'readonly').objectStore(STORE_CLI).get(id);
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+async function dbDeleteCliente(id) {
+  const d = await openDB();
+  return new Promise((resolve, reject) => {
+    const req = d.transaction(STORE_CLI, 'readwrite').objectStore(STORE_CLI).delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    NAVEGAÇÃO
    ══════════════════════════════════════════════════════════════════════════ */
@@ -89,7 +129,8 @@ function openForm(proc) {
   document.getElementById('form-' + proc).style.display = 'block';
   document.getElementById('form-title-bar').textContent  = 'Ficha de Anamnese – ' + TITLES[proc];
   clearFormFields();
-  initSignaturePad(proc[0]);   // init canvas for this form's prefix
+  initSignaturePad(proc[0]);         // cliente signature
+  initSignaturePad(proc[0] + 'p');   // profissional signature
   window.scrollTo(0, 0);
 }
 
@@ -159,6 +200,7 @@ async function openFicha(id) {
   clearFormFields();
   populateForm(ficha);
   initSignaturePad(ficha.proc[0]);
+  initSignaturePad(ficha.proc[0] + 'p');
   window.scrollTo(0, 0);
 }
 
@@ -226,6 +268,8 @@ function collectForm() {
       sexo: val('p-sexo'), tel: val('p-tel'), morada: val('p-morada'),
       email: val('p-email'), doc: val('p-doc'),
       nac: val('p-nac'),
+      atendData: val('p-atend-data'), profissional: val('p-profissional'),
+      sigProfDataURL: sigGetDataURL('pp'),
       estilo: val('p-estilo'), curv: val('p-curvatura'),
       esp: val('p-espessura'), modelo: val('p-modelo'), data: val('p-data'),
       gest: getRadio('p-gestante'), gestObs: obs(0),
@@ -246,6 +290,8 @@ function collectForm() {
       sexo: val('d-sexo'), tel: val('d-tel'), morada: val('d-morada'),
       email: val('d-email'), doc: val('d-doc'),
       nac: val('d-nac'),
+      atendData: val('d-atend-data'), profissional: val('d-profissional'),
+      sigProfDataURL: sigGetDataURL('dp'),
       // Q1
       fez:         getRadio('d-fez'),
       metodo:      getCheckboxes('d-metodo'),
@@ -284,6 +330,8 @@ function collectForm() {
       sexo: val('l-sexo'), tel: val('l-tel'), morada: val('l-morada'),
       email: val('l-email'), doc: val('l-doc'),
       nac: val('l-nac'),
+      atendData: val('l-atend-data'), profissional: val('l-profissional'),
+      sigProfDataURL: sigGetDataURL('lp'),
       saude: getRadio('l-saude'), pele: getRadio('l-pele'),
       grav: getRadio('l-grav'),   ama: getRadio('l-ama'),
       prot: getRadio('l-prot'),   coag: getRadio('l-coag'),
@@ -315,6 +363,8 @@ function collectForm() {
       sexo: val('m-sexo'), tel: val('m-tel'), morada: val('m-morada'),
       email: val('m-email'), doc: val('m-doc'),
       nac: val('m-nac'),
+      atendData: val('m-atend-data'), profissional: val('m-profissional'),
+      sigProfDataURL: sigGetDataURL('mp'),
       // informações de saúde
       alergia: getRadio('m-alergia'),
       alergiaEsp: val('m-alergia-esp'), alergiaMarca: val('m-alergia-marca'),
@@ -357,7 +407,10 @@ function populateForm(d) {
     setNac('p', d.nac);
     setVal('p-estilo', d.estilo); setVal('p-curvatura', d.curv);
     setVal('p-espessura', d.esp); setVal('p-modelo', d.modelo); setVal('p-data', d.data);
-    setRadio('p-gestante', d.gest); setRadio('p-proced', d.proc_ol);
+    document.getElementById('p-atend-data') && (document.getElementById('p-atend-data').value = d.atendData||'');
+    document.getElementById('p-profissional') && (document.getElementById('p-profissional').value = d.profissional||'');
+    if (d.sigProfDataURL) setTimeout(() => sigSetDataURL('pp', d.sigProfDataURL), 100);
+        setRadio('p-gestante', d.gest); setRadio('p-proced', d.proc_ol);
     setRadio('p-alergia', d.aler); setRadio('p-glaucoma', d.glau);
     setRadio('p-onco', d.onco); setRadio('p-rimel', d.rimel);
     setRadio('c-alergia', d.cAler); setRadio('c-ocular', d.cOcul);
@@ -375,7 +428,10 @@ function populateForm(d) {
     setVal('d-sexo', d.sexo); setVal('d-tel', d.tel);
     setVal('d-morada', d.morada); setVal('d-email', d.email); setVal('d-doc', d.doc);
     setNac('d', d.nac);
-    // Q1
+    document.getElementById('d-atend-data') && (document.getElementById('d-atend-data').value = d.atendData||'');
+    document.getElementById('d-profissional') && (document.getElementById('d-profissional').value = d.profissional||'');
+    if (d.sigProfDataURL) setTimeout(() => sigSetDataURL('dp', d.sigProfDataURL), 100);
+        // Q1
     setRadio('d-fez', d.fez);
     (d.metodo || []).forEach(v => { const el = document.querySelector(`input[name="d-metodo"][value="${v}"]`); if(el) el.checked=true; });
     setVal('d-metodo-outro', d.metodoOutro);
@@ -405,7 +461,10 @@ function populateForm(d) {
     setVal('l-sexo', d.sexo); setVal('l-tel', d.tel);
     setVal('l-morada', d.morada); setVal('l-email', d.email); setVal('l-doc', d.doc);
     setNac('l', d.nac);
-    setVal('l-zonas-prev', d.zonasPrev); setVal('l-ultima', d.ultima);
+    document.getElementById('l-atend-data') && (document.getElementById('l-atend-data').value = d.atendData||'');
+    document.getElementById('l-profissional') && (document.getElementById('l-profissional').value = d.profissional||'');
+    if (d.sigProfDataURL) setTimeout(() => sigSetDataURL('lp', d.sigProfDataURL), 100);
+        setVal('l-zonas-prev', d.zonasPrev); setVal('l-ultima', d.ultima);
     setVal('l-obs', d.obs); setVal('l-data-inicio', d.dataInicio);
     ['saude','pele','grav','ama','prot','coag','neuro','onco','cola','trat','tatu',
      'derm','aler','horm','meno','auto','vari','acne','cica','epil','diab','viti',
@@ -424,7 +483,10 @@ function populateForm(d) {
     setVal('m-sexo', d.sexo); setVal('m-tel', d.tel);
     setVal('m-morada', d.morada); setVal('m-email', d.email);
     setVal('m-doc', d.doc); setNac('m', d.nac);
-    setRadio('m-alergia', d.alergia); setVal('m-alergia-esp', d.alergiaEsp);
+    document.getElementById('m-atend-data') && (document.getElementById('m-atend-data').value = d.atendData||'');
+    document.getElementById('m-profissional') && (document.getElementById('m-profissional').value = d.profissional||'');
+    if (d.sigProfDataURL) setTimeout(() => sigSetDataURL('mp', d.sigProfDataURL), 100);
+        setRadio('m-alergia', d.alergia); setVal('m-alergia-esp', d.alergiaEsp);
     setVal('m-alergia-marca', d.alergiaMarca);
     setRadio('m-condicao', d.condicao); setVal('m-condicao-esp', d.condicaoEsp);
     setRadio('m-gravida', d.gravida);
@@ -452,10 +514,10 @@ function clearFormFields() {
     });
   const tbody = document.getElementById('sessions-tbody');
   if (tbody) { tbody.innerHTML = ''; addSessionRow(); }
-  // Clear signature pad
+  // Clear signature pads (cliente + profissional)
   const pfx = currentProc[0];
-  sigClear(pfx);
-  if (_sig[pfx]) _sig[pfx].hasStroke = false;
+  sigClear(pfx);       if (_sig[pfx])       _sig[pfx].hasStroke = false;
+  sigClear(pfx + 'p'); if (_sig[pfx + 'p']) _sig[pfx + 'p'].hasStroke = false;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -559,13 +621,14 @@ function makeYnTable(pairs) {
   }).join('')}</table>`;
 }
 
-function sigRow(blocks, sigDataURL) {
+function sigRow(blocks, sigDataURL, sigProfDataURL) {
   return `<div class="pd-sign-row">${blocks.map(([desc,v], i) => {
-    // First block is always "Assinatura da Cliente" — render the image if available
+    // i=0 → Assinatura da Cliente; i=1 with profDataURL → Assinatura da Técnica
     const isClienteSig = i === 0 && sigDataURL;
-    const lineContent = isClienteSig
-      ? `<img src="${sigDataURL}" class="pd-sig-img" alt="Assinatura">`
-      : (v || '');
+    const isProfSig    = i === 1 && sigProfDataURL;
+    const lineContent  = isClienteSig ? `<img src="${sigDataURL}" class="pd-sig-img" alt="Assinatura">`
+                       : isProfSig    ? `<img src="${sigProfDataURL}" class="pd-sig-img" alt="Ass. Profissional">`
+                       : (v || '');
     return `<div class="pd-sign-block">
       <div class="pd-sign-line">${lineContent}</div>
       <div class="pd-sign-desc">${desc}</div>
@@ -617,6 +680,12 @@ function dadosClienteBlock(d) {
   ]);
 }
 
+function atendimentoBlock(d) {
+  return makeFields([
+    [['Data do Procedimento:', formatDate(d.atendData||'')], ['Profissional Responsável:', d.profissional||'']],
+  ]);
+}
+
 /* ── Bloco de Autorização de Imagem (comum a todas) ── */
 function imagemBlock(imgAuth) {
   return `<div style="margin-top:6mm;padding:5mm 0 0;border-top:1px solid #f0c0d6;">
@@ -646,6 +715,7 @@ function buildPestanasHTML(d) {
   const p1 = `<div class="pd-page">
     ${printHeader('FICHA DE ANAMNESE – EXTENSÃO DE PESTANAS')}
     ${dadosClienteBlock(d)}
+    ${atendimentoBlock(d)}
     <div class="pd-section-title">AVALIAÇÃO</div>
     ${makeYnTable([
       ['É gestante ou lactante?' + (d.gestObs ? ' – ' + d.gestObs : ''), d.gest],
@@ -657,7 +727,7 @@ function buildPestanasHTML(d) {
     ])}
     <div class="pd-section-title">PROCEDIMENTO</div>
     ${makeFields([[['Estilo:', d.estilo]],[['Curvatura:', d.curv],['Espessura:', d.esp],['Modelo dos fios:', d.modelo]]])}
-    ${sigRow([['Assinatura da Cliente',''],['Data do Procedimento', dataFmt]], d.sigDataURL)}
+    ${sigRow([['Assinatura da Cliente',''],['Data do Procedimento', dataFmt]], d.sigDataURL, d.sigProfDataURL)}
   </div>`;
 
   const p2 = `<div class="pd-page">
@@ -684,7 +754,7 @@ function buildPestanasHTML(d) {
       <p style="font-size:7.5pt;color:#888;"><i>RGPD: Dados recolhidos exclusivamente para gestão da ficha de cliente.</i></p>
     </div>
     ${imagemBlock(d.imgAuth)}
-    ${sigRow([['Assinatura da Cliente',''],['Assinatura da Técnica',''],['Data do Procedimento', dataFmt]], d.sigDataURL)}
+    ${sigRow([['Assinatura da Cliente',''],['Assinatura da Técnica',''],['Data do Procedimento', dataFmt]], d.sigDataURL, d.sigProfDataURL)}
   </div>`;
 
   return p1 + p2;
@@ -741,6 +811,7 @@ function buildDepilacaoHTML(d) {
   return `<div class="pd-page">
     ${printHeader('FICHA DE ANAMNESE – DEPILAÇÃO')}
     ${dadosClienteBlock(d)}
+    ${atendimentoBlock(d)}
     <div class="pd-section-title">HISTÓRICO</div>
     <table class="pd-yn-table">
       ${pYn('1) Já fez depilação antes?', d.fez)}
@@ -757,7 +828,7 @@ function buildDepilacaoHTML(d) {
       ${pYn('8) Está grávida ou a amamentar?', d.gravida)}
     </table>
     ${imagemBlock(d.imgAuth)}
-    ${sigRow([['Assinatura da Cliente',''],['Data','&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;']], d.sigDataURL)}
+    ${sigRow([['Assinatura da Cliente',''],['Data','&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;']], d.sigDataURL, d.sigProfDataURL)}
   </div>`;
 }
 
@@ -802,6 +873,7 @@ function buildLaserHTML(d) {
   const p1 = `<div class="pd-page">
     ${printHeader('FICHA DE ANAMNESE – DEPILAÇÃO A LASER DE DIODO')}
     ${dadosClienteBlock(d)}
+    ${atendimentoBlock(d)}
     <div class="pd-section-title">AVALIAÇÃO</div>${makeYnTable(ynRows1)}
     <div class="pd-section-title">AVALIAÇÃO PRÉ-TRATAMENTO</div>${makeYnTable(ynRows2)}
     ${makeFields([[['Se SIM, em quais zonas?', d.zonasPrev, 2],['Última vez que fez?', d.ultima]]])}
@@ -811,7 +883,7 @@ function buildLaserHTML(d) {
     <div style="border:1.5px solid #E46589;border-radius:3px;min-height:12mm;padding:5px 8px;font-size:9pt;">${d.obs||''}</div>
     <div style="margin:6mm 0 3mm;font-size:8.5pt;line-height:1.55;color:#333;">Tomei conhecimento de todas as precauções e contra-indicações do tratamento. Assumo comunicar em qualquer sessão qualquer alteração da minha situação.</div>
     ${imagemBlock(d.imgAuth)}
-    ${sigRow([['Assinatura da Cliente',''],['Assinatura da Técnica',''],['Data do Procedimento', dataFmt]], d.sigDataURL)}
+    ${sigRow([['Assinatura da Cliente',''],['Assinatura da Técnica',''],['Data do Procedimento', dataFmt]], d.sigDataURL, d.sigProfDataURL)}
   </div>`;
 
   const p2 = `<div class="pd-page">
@@ -841,6 +913,7 @@ function buildManicureHTML(d) {
   const p1 = `<div class="pd-page">
     ${printHeader('FICHA DE ANAMNESE – MANICURE')}
     ${dadosClienteBlock(d)}
+    ${atendimentoBlock(d)}
     <div class="pd-section-title">INFORMAÇÕES DE SAÚDE</div>
     <table class="pd-yn-table">
       <tr>
@@ -890,7 +963,7 @@ function buildManicureHTML(d) {
       <b>Assinatura do Cliente:</b> Declaro que as informações fornecidas acima são verdadeiras e completas. Entendo os riscos e benefícios do alongamento de unhas e concordo com o procedimento.
     </div>
     ${imagemBlock(d.imgAuth)}
-    ${sigRow([['Assinatura da Cliente',''],['Profissional Responsável',''],['Data', dataFmt]], d.sigDataURL)}
+    ${sigRow([['Assinatura da Cliente',''],['Profissional Responsável',''],['Data', dataFmt]], d.sigDataURL, d.sigProfDataURL)}
   </div>`;
 
   return p1;
@@ -964,6 +1037,219 @@ function getPrintCSS() {
 }
 
 
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CLIENTES — navegação, CRUD e busca inline
+   ══════════════════════════════════════════════════════════════════════════ */
+let currentClienteId = null;
+let allClientes       = [];   // cache for fast search
+
+function showClientes() {
+  document.getElementById('screen-select').classList.remove('active');
+  document.getElementById('screen-fichas').style.display   = 'none';
+  document.getElementById('screen-clientes').style.display = 'flex';
+  renderClientesList('');
+}
+
+function backFromClientes() {
+  document.getElementById('screen-clientes').style.display = 'none';
+  document.getElementById('screen-select').classList.add('active');
+}
+
+function backFromClienteForm() {
+  document.getElementById('screen-cliente-form').style.display = 'none';
+  document.getElementById('screen-clientes').style.display     = 'flex';
+}
+
+/* ── List rendering ── */
+async function renderClientesList(query) {
+  const container = document.getElementById('clientes-list');
+  container.innerHTML = '<div class="fichas-loading">A carregar…</div>';
+  allClientes = await dbGetAllClientes();
+  allClientes.sort((a,b) => (a.nome||'').localeCompare(b.nome||'', 'pt'));
+  filterClientes(query || document.getElementById('clientes-search')?.value || '');
+}
+
+function filterClientes(query) {
+  const container = document.getElementById('clientes-list');
+  if (!container) return;
+  const q = query.toLowerCase().trim();
+  const list = q
+    ? allClientes.filter(c =>
+        (c.nome||'').toLowerCase().includes(q) ||
+        (c.tel||'').toLowerCase().includes(q)  ||
+        (c.email||'').toLowerCase().includes(q))
+    : allClientes;
+
+  if (!list.length) {
+    container.innerHTML = '<div class="clientes-empty">'
+      + (q ? 'Nenhuma cliente encontrada para "' + query + '".'
+           : 'Nenhuma cliente cadastrada ainda.<br>Clique em <strong>+ Nova Cliente</strong> para começar.')
+      + '</div>';
+    return;
+  }
+
+  container.innerHTML = list.map(c => {
+    const initials = (c.nome||'?').trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const meta = [c.tel, c.email].filter(Boolean).join(' · ');
+    const nac  = getNacDisplay(c.nac||'');
+    return `<div class="cliente-card">
+      <div class="cliente-avatar">${initials}</div>
+      <div class="cliente-card-info">
+        <div class="cliente-card-nome">${c.nome||'(sem nome)'}</div>
+        <div class="cliente-card-meta">
+          ${meta ? `<span>${meta}</span>` : ''}
+          ${nac  ? `<span class="dot">·</span><span>${nac}</span>` : ''}
+        </div>
+      </div>
+      <div class="cliente-card-actions">
+        <button class="btn-cl-edit" onclick="openClienteForm(${c.id})">✏️ Editar</button>
+        <button class="btn-cl-del"  onclick="deleteCliente(${c.id})">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Form open/save ── */
+async function openClienteForm(id) {
+  currentClienteId = id;
+  document.getElementById('screen-clientes').style.display     = 'none';
+  document.getElementById('screen-cliente-form').style.display = 'flex';
+  document.getElementById('cliente-form-title').textContent    = id ? 'Editar Cliente' : 'Nova Cliente';
+  clearClienteForm();
+  if (id) {
+    const c = await dbGetCliente(id);
+    if (c) populateClienteForm(c);
+  }
+}
+
+function clearClienteForm() {
+  ['cl-nome','cl-nasc','cl-idade','cl-sexo','cl-tel','cl-morada','cl-email','cl-doc','cl-obs']
+    .forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.value = '';
+    });
+  // reset nationality
+  const lbl = document.getElementById('nac-lbl-cl');
+  const flg = document.getElementById('nac-flag-cl');
+  const hid = document.getElementById('cl-nac');
+  if (lbl) { lbl.textContent = 'Selecionar país…'; lbl.classList.add('placeholder'); }
+  if (flg) flg.textContent = '';
+  if (hid) hid.value = '';
+  const list = document.getElementById('nac-list-cl');
+  if (list) { list.innerHTML = ''; list.dataset.built = ''; }
+}
+
+function populateClienteForm(c) {
+  const sv = (id, v) => { const el=document.getElementById(id); if(el&&v) el.value=v; };
+  sv('cl-nome', c.nome); sv('cl-nasc', c.nasc);
+  document.getElementById('cl-idade').value = c.nasc ? calcIdade(c.nasc) : (c.idade||'');
+  sv('cl-sexo', c.sexo); sv('cl-tel', c.tel);
+  sv('cl-morada', c.morada); sv('cl-email', c.email);
+  sv('cl-doc', c.doc); sv('cl-obs', c.obs);
+  setNac('cl', c.nac);
+}
+
+function getClienteFormData() {
+  return {
+    nome:   document.getElementById('cl-nome')?.value.trim() || '',
+    nasc:   document.getElementById('cl-nasc')?.value || '',
+    idade:  document.getElementById('cl-idade')?.value || '',
+    sexo:   document.getElementById('cl-sexo')?.value || '',
+    tel:    document.getElementById('cl-tel')?.value.trim() || '',
+    morada: document.getElementById('cl-morada')?.value.trim() || '',
+    email:  document.getElementById('cl-email')?.value.trim() || '',
+    doc:    document.getElementById('cl-doc')?.value.trim() || '',
+    nac:    document.getElementById('cl-nac')?.value || '',
+    obs:    document.getElementById('cl-obs')?.value.trim() || '',
+  };
+}
+
+async function saveCliente() {
+  const data = getClienteFormData();
+  if (!data.nome) { alert('Por favor preencha o nome da cliente.'); return; }
+  if (currentClienteId) data.id = currentClienteId;
+  await dbSaveCliente(data);
+  showToast('✅ Cliente guardada com sucesso!');
+  backFromClienteForm();
+  renderClientesList('');
+}
+
+async function deleteCliente(id) {
+  if (!confirm('Eliminar esta cliente permanentemente?')) return;
+  await dbDeleteCliente(id);
+  await renderClientesList('');
+}
+
+/* ── Busca inline dentro da ficha ── */
+async function buscaClienteInline(pfx, query) {
+  const resultsDiv = document.getElementById(pfx + '-busca-results');
+  if (!resultsDiv) return;
+  const q = query.trim().toLowerCase();
+  if (!q) { resultsDiv.style.display = 'none'; return; }
+
+  if (!allClientes.length) allClientes = await dbGetAllClientes();
+  const found = allClientes.filter(c =>
+    (c.nome||'').toLowerCase().includes(q) ||
+    (c.tel||'').toLowerCase().includes(q)  ||
+    (c.email||'').toLowerCase().includes(q)
+  ).slice(0, 8);
+
+  if (!found.length) {
+    resultsDiv.style.display = 'block';
+    resultsDiv.innerHTML = '<div class="busca-item"><div class="busca-item-info"><div class="busca-item-sub" style="padding:8px 4px;">Nenhuma cliente encontrada</div></div></div>';
+    return;
+  }
+
+  resultsDiv.style.display = 'block';
+  resultsDiv.innerHTML = found.map(c => {
+    const initials = (c.nome||'?').trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const sub = [c.tel, getNacDisplay(c.nac)].filter(Boolean).join(' · ');
+    return `<div class="busca-item" onclick="preencherDadosCliente('${pfx}', ${c.id})">
+      <div class="busca-item-avatar">${initials}</div>
+      <div class="busca-item-info">
+        <div class="busca-item-nome">${c.nome}</div>
+        ${sub ? `<div class="busca-item-sub">${sub}</div>` : ''}
+      </div>
+      <span class="busca-item-badge">Usar</span>
+    </div>`;
+  }).join('');
+}
+
+async function preencherDadosCliente(pfx, clienteId) {
+  const c = await dbGetCliente(clienteId);
+  if (!c) return;
+
+  const sv = (id, v) => { const el=document.getElementById(id); if(el&&v!==undefined) el.value=v; };
+
+  sv(`${pfx}-nome`,   c.nome);
+  sv(`${pfx}-nasc`,   c.nasc);
+  const idadeEl = document.getElementById(`${pfx}-idade`);
+  if (idadeEl) idadeEl.value = c.nasc ? calcIdade(c.nasc) : (c.idade||'');
+  sv(`${pfx}-sexo`,   c.sexo);
+  sv(`${pfx}-tel`,    c.tel);
+  sv(`${pfx}-morada`, c.morada);
+  sv(`${pfx}-email`,  c.email);
+  sv(`${pfx}-doc`,    c.doc);
+  setNac(pfx, c.nac);
+
+  // Close results and clear search
+  const res = document.getElementById(`${pfx}-busca-results`);
+  const inp = document.getElementById(`${pfx}-busca-cliente`);
+  if (res) res.style.display = 'none';
+  if (inp) inp.value = '';
+
+  showToast(`✅ Dados de ${c.nome} preenchidos!`);
+}
+
+// Close busca results when clicking outside
+document.addEventListener('click', e => {
+  if (!e.target.closest('.cliente-search-inline')) {
+    document.querySelectorAll('.cliente-busca-results').forEach(el => el.style.display = 'none');
+  }
+});
 
 /* ══════════════════════════════════════════════════════════════════════════
    ASSINATURA DIGITAL — Canvas pad
